@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Historias de Energías Renovables{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <header class="text-center space-y-4">
+            <span class="inline-flex items-center px-4 py-2 bg-solar-yellow bg-opacity-20 rounded-full text-colombia-blue font-semibold text-sm">
+                <i class="fas fa-comments mr-2"></i>
+                Blog de experiencias reales
+            </span>
+            <h1 class="text-4xl font-bold text-colombia-blue">Conoce proyectos de energías renovables en Colombia</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                Aprende de casos reales compartidos por la comunidad. Descubre retos, aprendizajes y resultados de quienes están impulsando la transición energética.
+            </p>
+        </header>
+
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8">
+            <form id="blog-filter-form" method="get" class="grid gap-6 md:grid-cols-3 lg:grid-cols-4 items-end">
+                <div class="md:col-span-2 lg:col-span-3">
+                    <label class="text-sm font-semibold text-gray-700 mb-2 block">Palabra clave</label>
+                    <div class="relative">
+                        <input type="text" name="q" value="{{ search_query }}" placeholder="Comparte o busca experiencias solares" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-solar-yellow focus:border-transparent transition">
+                        <i class="fas fa-search absolute right-4 top-3.5 text-gray-400"></i>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-gray-700 mb-2 block">Ordenar por</label>
+                    <select name="ordering" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-solar-yellow focus:border-transparent transition">
+                        <option value="recent" {% if selected_ordering == 'recent' %}selected{% endif %}>Más recientes</option>
+                        <option value="popular" {% if selected_ordering == 'popular' %}selected{% endif %}>Más comentadas / populares</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-3 md:col-span-1">
+                    <button type="submit" class="px-5 py-3 rounded-lg bg-colombia-blue text-white font-semibold hover:bg-blue-800 transition">Aplicar filtros</button>
+                    <a href="{% url 'blog:home' %}" class="px-5 py-3 rounded-lg border border-gray-300 text-gray-600 hover:border-solar-yellow transition text-center">Limpiar</a>
+                </div>
+            </form>
+        </div>
+
+        <div id="posts-grid" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {% include 'blog/_post_cards.html' %}
+        </div>
+
+        <div id="posts-pagination">
+            {% include 'blog/_post_pagination.html' %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('blog-filter-form');
+    const grid = document.getElementById('posts-grid');
+    const pagination = document.getElementById('posts-pagination');
+
+    function applyFilters(event) {
+        if (event) event.preventDefault();
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData);
+        const url = `${form.getAttribute('action') || window.location.pathname}?${params.toString()}`;
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        }).then(response => response.json()).then(data => {
+            grid.innerHTML = data.posts_html;
+            pagination.innerHTML = data.pagination_html;
+            attachPaginationLinks();
+        }).catch(() => {
+            window.location.href = url;
+        });
+    }
+
+    function attachPaginationLinks() {
+        pagination.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const url = this.getAttribute('href');
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }).then(response => response.json()).then(data => {
+                    grid.innerHTML = data.posts_html;
+                    pagination.innerHTML = data.pagination_html;
+                    attachPaginationLinks();
+                }).catch(() => {
+                    window.location.href = url;
+                });
+            });
+        });
+    }
+
+    form.addEventListener('submit', applyFilters);
+    form.querySelectorAll('select').forEach(select => {
+        select.addEventListener('change', applyFilters);
+    });
+    attachPaginationLinks();
+});
+</script>
+{% endblock %}

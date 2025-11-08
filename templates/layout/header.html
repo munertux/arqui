@@ -1,0 +1,161 @@
+<nav class="bg-colombia-blue shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex items-center">
+                <a href="{% url 'core:home' %}" class="flex items-center text-white font-bold text-xl">
+                    <i class="fas fa-solar-panel text-solar-yellow mr-2"></i>
+                    SIESE
+                </a>
+            </div>
+
+            <!-- Desktop navigation -->
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="{% url 'core:home' %}" class="text-white hover:text-solar-yellow transition-colors">
+                    <i class="fas fa-home mr-1"></i> Inicio
+                </a>
+                
+                <a href="{% url 'regulatory:search' %}" class="text-white hover:text-solar-yellow transition-colors">
+                    <i class="fas fa-gavel mr-1"></i> Normativas
+                </a>
+
+                <a href="{% url 'blog:home' %}" class="text-white hover:text-solar-yellow transition-colors">
+                    <i class="fas fa-comments mr-1"></i> Blog
+                </a>
+
+                {% if user.is_authenticated %}
+                <div class="relative group">
+                    <button class="flex items-center text-white hover:text-solar-yellow transition-colors">
+                        <i class="fas fa-user-circle mr-1"></i>
+                        {{ user.first_name|default:user.email }}
+                        <i class="fas fa-chevron-down ml-1"></i>
+                    </button>
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden group-hover:block">
+                        <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                            <i class="fas fa-user mr-2"></i> Mi Perfil
+                        </a>
+                        {% if user.is_admin_role %}
+                        <div class="border-t border-gray-100"></div>
+                        <a href="{% url 'core:dashboard' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                            <i class="fas fa-th-large mr-2"></i> Panel administrativo
+                        </a>
+                        <a href="{% url 'admin:index' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                            <i class="fas fa-tools mr-2"></i> Backend Django
+                        </a>
+                        <a href="{% url 'regulatory:admin_framework_list' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                            <i class="fas fa-gavel mr-2"></i> Gestionar normativas
+                        </a>
+                        <a href="{% url 'blog:report_list' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                            <i class="fas fa-shield-alt mr-2"></i> Reportes del blog
+                        </a>
+                        {% endif %}
+                        {% if user.is_editor %}
+                        <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                            <i class="fas fa-edit mr-2"></i> Panel Editor
+                        </a>
+                        {% endif %}
+                        <button type="button"
+                                data-action="logout"
+                                data-logout-url="{% url 'account_logout' %}"
+                                class="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{% url 'account_login' %}" class="bg-solar-yellow text-colombia-blue px-4 py-2 rounded hover:bg-yellow-400 transition-colors font-medium">
+                    <i class="fas fa-sign-in-alt mr-1"></i> Iniciar Sesión
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile menu button -->
+            <div class="md:hidden flex items-center">
+                <button id="mobile-menu-btn" class="text-white hover:text-solar-yellow">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile navigation -->
+    <div id="mobile-menu" class="hidden md:hidden bg-colombia-blue">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a href="{% url 'regulatory:search' %}" class="block text-white hover:text-solar-yellow px-3 py-2">
+                <i class="fas fa-gavel mr-2"></i> Normativas
+            </a>
+            <a href="{% url 'core:home' %}" class="block text-white hover:text-solar-yellow px-3 py-2">
+                <i class="fas fa-home mr-2"></i> Inicio
+            </a>
+            <a href="{% url 'blog:home' %}" class="block text-white hover:text-solar-yellow px-3 py-2">
+                <i class="fas fa-comments mr-2"></i> Blog
+            </a>
+        </div>
+    </div>
+</nav>
+<form id="logout-form" action="{% url 'account_logout' %}" method="post" class="hidden">
+    {% csrf_token %}
+</form>
+<script>
+(function () {
+    const logoutForm = document.getElementById('logout-form');
+
+    function submitFallback() {
+        if (logoutForm) {
+            logoutForm.submit();
+        } else {
+            window.location.href = '{% url "account_logout" %}';
+        }
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) {
+            return parts.pop().split(';').shift();
+        }
+        return null;
+    }
+
+    function setupLogoutButtons() {
+        const buttons = document.querySelectorAll('[data-action="logout"]');
+        if (!buttons.length) {
+            return;
+        }
+        buttons.forEach((button) => {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                const url = button.dataset.logoutUrl;
+                const csrfToken = getCookie('csrftoken');
+
+                if (!csrfToken) {
+                    submitFallback();
+                    return;
+                }
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                }).then((response) => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        submitFallback();
+                    }
+                }).catch(() => {
+                    submitFallback();
+                });
+            });
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupLogoutButtons);
+    } else {
+        setupLogoutButtons();
+    }
+})();
+</script>

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Categoría educativa - SIESE{% endblock %}
+
+{% block content %}
+<section class="py-14">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+            <h1 class="text-3xl font-bold text-colombia-blue mb-4">Categoría educativa</h1>
+            <p class="text-gray-600">Próximamente encontrarás aquí recursos filtrados por temática. Mientras tanto, vuelve a la <a href="{% url 'educational:home' %}" class="text-colombia-blue font-semibold hover:text-solar-orange">academia principal</a>.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

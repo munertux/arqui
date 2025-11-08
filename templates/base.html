@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SIESE - Sistema Integral de Energía Solar en Colombia{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Configuración de Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'solar-yellow': '#FFD700',
+                        'solar-orange': '#FF8C00',
+                        'earth-green': '#228B22',
+                        'sky-blue': '#87CEEB',
+                        'colombia-blue': '#003A70',
+                        'colombia-yellow': '#FFD700',
+                        'colombia-red': '#CE1126'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="app-body min-h-screen flex flex-col">
+    {% include 'layout/header.html' %}
+
+    <div class="app-background flex-grow flex flex-col">
+        {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} bg-{% if message.tags == 'error' %}red{% elif message.tags == 'warning' %}yellow{% elif message.tags == 'success' %}green{% else %}blue{% endif %}-100 border border-{% if message.tags == 'error' %}red{% elif message.tags == 'warning' %}yellow{% elif message.tags == 'success' %}green{% else %}blue{% endif %}-400 text-{% if message.tags == 'error' %}red{% elif message.tags == 'warning' %}yellow{% elif message.tags == 'success' %}green{% else %}blue{% endif %}-700 px-4 py-3 rounded mb-4">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <main class="flex-grow">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="bg-gray-800 text-white py-12 mt-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid md:grid-cols-4 gap-8">
+                    <div>
+                    <h3 class="font-bold text-lg mb-4 text-solar-yellow">
+                        <i class="fas fa-solar-panel mr-2"></i>
+                        SIESE
+                    </h3>
+                    <p class="text-gray-300">
+                        Sistema Integral de Energía Solar en Colombia. 
+                        Tu plataforma para simular, monitorear y aprender sobre energía solar.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Herramientas</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="{% url 'simulator:home' %}" class="hover:text-solar-yellow">Simulador Solar</a></li>
+                        <li><a href="{% url 'monitoring:dashboard' %}" class="hover:text-solar-yellow">Panel de Monitoreo</a></li>
+                        <li><a href="{% url 'educational:home' %}" class="hover:text-solar-yellow">Recursos Educativos</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Información</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="{% url 'regulatory:legal_framework_list' %}" class="hover:text-solar-yellow">Marco Normativo</a></li>
+                        <li><a href="{% url 'news:home' %}" class="hover:text-solar-yellow">Noticias</a></li>
+                        <li><a href="#" class="hover:text-solar-yellow">Sobre Nosotros</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Contacto</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><i class="fas fa-envelope mr-2"></i> info@siese.co</li>
+                        <li><i class="fas fa-phone mr-2"></i> +57 (1) 123-4567</li>
+                        <li><i class="fas fa-map-marker-alt mr-2"></i> Bogotá, Colombia</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; {{ "now"|date:"Y" }} SIESE. Todos los derechos reservados.</p>
+            </div>
+        </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

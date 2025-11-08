@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Buscador de Normativas - SIESE{% endblock %}
+
+{% block content %}
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        <header class="text-center space-y-4">
+            <span class="inline-flex items-center px-4 py-2 bg-solar-yellow bg-opacity-20 rounded-full text-colombia-blue font-semibold text-sm">
+                <i class="fas fa-search mr-2"></i>
+                Buscador avanzado de normativas
+            </span>
+            <h1 class="text-4xl font-bold text-colombia-blue">Encuentra la normativa exacta que necesitas</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                Filtra por año, entidad emisora y palabras clave. Ordena los resultados por relevancia o fecha para ubicar rápidamente la información regulatoria más importante.
+            </p>
+        </header>
+
+        <form method="get" class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8">
+            <div class="grid gap-6 md:grid-cols-4">
+                <div class="md:col-span-2">
+                    <label for="search-q" class="block text-sm font-semibold text-gray-700 mb-2">Palabra clave</label>
+                    <div class="relative">
+                        <input id="search-q" type="text" name="q" value="{{ q }}" placeholder="Ej: transición energética, incentivos tributarios..." class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-solar-yellow focus:border-transparent transition">
+                        <i class="fas fa-search absolute right-4 top-3.5 text-gray-400"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="search-year" class="block text-sm font-semibold text-gray-700 mb-2">Año</label>
+                    <select id="search-year" name="year" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-solar-yellow focus:border-transparent transition">
+                        <option value="">Todos los años</option>
+                        {% for year_option in available_years %}
+                        <option value="{{ year_option }}" {% if year_option|stringformat:'s' == selected_year %}selected{% endif %}>{{ year_option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="search-entity" class="block text-sm font-semibold text-gray-700 mb-2">Entidad emisora</label>
+                    <select id="search-entity" name="entity" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-solar-yellow focus:border-transparent transition">
+                        <option value="">Todas las entidades</option>
+                        {% for entity_option in available_entities %}
+                        <option value="{{ entity_option }}" {% if entity_option == selected_entity %}selected{% endif %}>{{ entity_option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="w-full md:w-auto">
+                    <label for="search-ordering" class="text-sm font-semibold text-gray-700 block mb-2">Ordenar resultados</label>
+                    <select id="search-ordering" name="ordering" class="w-full md:w-56 px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-solar-yellow focus:border-transparent transition">
+                        <option value="relevance" {% if selected_ordering == 'relevance' %}selected{% endif %}>Relevancia</option>
+                        <option value="date" {% if selected_ordering == 'date' %}selected{% endif %}>Fecha (más reciente primero)</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'regulatory:search' %}" class="px-5 py-3 rounded-lg border border-gray-300 text-gray-600 hover:border-solar-yellow transition">Limpiar</a>
+                    <button type="submit" class="px-6 py-3 rounded-lg bg-colombia-blue text-white font-semibold hover:bg-blue-800 transition">Buscar normativas</button>
+                </div>
+            </div>
+        </form>
+
+        <section class="space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-700">Resultados</h2>
+                <p class="text-sm text-gray-500">{{ page_obj.paginator.count }} normativa{% if page_obj.paginator.count != 1 %}s{% endif %} encontradas</p>
+            </div>
+
+            {% if results %}
+            <div class="grid gap-6 md:grid-cols-2">
+                {% for framework in results %}
+                <article class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:border-solar-yellow transition">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="px-3 py-1 inline-flex items-center rounded-full text-sm font-semibold bg-solar-yellow bg-opacity-20 text-colombia-blue">
+                            <i class="fas fa-gavel mr-2"></i>
+                            {{ framework.get_document_type_display }} {{ framework.document_number }}
+                        </span>
+                        <span class="text-sm text-gray-500"><i class="fas fa-calendar mr-1"></i>{{ framework.year }}</span>
+                    </div>
+                    {% if framework.issuing_entity %}
+                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-3">{{ framework.issuing_entity }}</p>
+                    {% endif %}
+                    <h3 class="text-xl font-bold text-colombia-blue mb-3">
+                        <a href="{% url 'regulatory:legal_framework_detail' framework.document_type framework.document_number framework.year %}" class="hover:text-solar-orange transition">{{ framework.title }}</a>
+                    </h3>
+                    <p class="text-gray-600 text-sm mb-4">{{ framework.summary|truncatewords:35 }}</p>
+                    <div class="flex items-center justify-between">
+                        <a href="{% url 'regulatory:legal_framework_detail' framework.document_type framework.document_number framework.year %}" class="text-sm font-semibold text-colombia-blue hover:text-solar-orange">Ver detalles<i class="fas fa-arrow-right ml-2"></i></a>
+                        <a href="{{ framework.official_url }}" target="_blank" class="text-sm text-gray-500 hover:text-colombia-blue"><i class="fas fa-external-link-alt mr-1"></i>Fuente</a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+
+            {% if is_paginated %}
+            <div class="flex justify-center mt-8">
+                <div class="inline-flex items-center space-x-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?{% if q %}q={{ q|urlencode }}&amp;{% endif %}{% if selected_year %}year={{ selected_year }}&amp;{% endif %}{% if selected_entity %}entity={{ selected_entity|urlencode }}&amp;{% endif %}ordering={{ selected_ordering }}&amp;page={{ page_obj.previous_page_number }}" class="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:border-solar-yellow">Anterior</a>
+                    {% endif %}
+                    <span class="px-3 py-2 text-sm bg-colombia-blue text-white rounded-lg">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                    {% if page_obj.has_next %}
+                        <a href="?{% if q %}q={{ q|urlencode }}&amp;{% endif %}{% if selected_year %}year={{ selected_year }}&amp;{% endif %}{% if selected_entity %}entity={{ selected_entity|urlencode }}&amp;{% endif %}ordering={{ selected_ordering }}&amp;page={{ page_obj.next_page_number }}" class="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:border-solar-yellow">Siguiente</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-10 text-center">
+                <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">No encontramos normativas con esos criterios.</h3>
+                <p class="text-gray-500">Intenta modificar los filtros o prueba con palabras clave diferentes.</p>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+</section>
+{% endblock %}

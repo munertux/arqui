@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - SIESE{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-r from-colombia-blue to-sky-blue text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">
+                <i class="fas fa-solar-panel text-solar-yellow mr-4"></i>
+                SIESE
+            </h1>
+            <h2 class="text-xl md:text-2xl mb-8 text-gray-100">
+                Sistema Integral de Energía Solar en Colombia
+            </h2>
+            <p class="text-lg md:text-xl mb-10 max-w-3xl mx-auto text-gray-200">
+                {{ description }}
+            </p>
+            <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+                <a href="{% url 'regulatory:legal_framework_list' %}" 
+                   class="inline-block bg-solar-yellow text-colombia-blue px-8 py-3 rounded-lg font-semibold hover:bg-yellow-400 transition-colors">
+                    <i class="fas fa-gavel mr-2"></i>
+                    Explorar normativas
+                </a>
+                <a href="{% url 'blog:home' %}" 
+                   class="inline-block border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-colombia-blue transition-colors">
+                    <i class="fas fa-comments mr-2"></i>
+                    Ir al blog
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Módulos Principales
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Accede rápidamente a las herramientas disponibles en la plataforma SIESE.
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Repositorio Normativo -->
+            <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow border border-gray-100">
+                <div class="text-colombia-red text-4xl mb-4">
+                    <i class="fas fa-gavel"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Repositorio Normativo</h3>
+                <p class="text-gray-600 mb-6">
+                    Consulta leyes, resoluciones y lineamientos actualizados del sector energético colombiano.
+                </p>
+                <a href="{% url 'regulatory:legal_framework_list' %}" 
+                   class="inline-flex items-center text-colombia-blue hover:text-colombia-red font-medium">
+                    Consultar normativas
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <!-- Buscador especializado -->
+            <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow border border-gray-100">
+                <div class="text-solar-orange text-4xl mb-4">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Buscador especializado</h3>
+                <p class="text-gray-600 mb-6">
+                    Encuentra rápidamente normativas usando filtros por palabra clave, entidad emisora o año.
+                </p>
+                <a href="{% url 'regulatory:search' %}" 
+                   class="inline-flex items-center text-colombia-blue hover:text-solar-orange font-medium">
+                    Ir al buscador
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <!-- Blog -->
+            <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow border border-gray-100">
+                <div class="text-colombia-blue text-4xl mb-4">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Blog SIESE</h3>
+                <p class="text-gray-600 mb-6">
+                    Lee artículos, análisis y guías elaboradas por el equipo SIESE sobre energía solar y su impacto.
+                </p>
+                <a href="{% url 'blog:home' %}" 
+                   class="inline-flex items-center text-colombia-blue hover:text-solar-orange font-medium">
+                    Ver publicaciones
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <!-- Noticias -->
+            <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow border border-gray-100">
+                <div class="text-solar-yellow text-4xl mb-4">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Noticias y Actualizaciones</h3>
+                <p class="text-gray-600 mb-6">
+                    Mantente al día con las últimas noticias, proyectos y actualizaciones del sector solar en Colombia.
+                </p>
+                <a href="{% url 'news:home' %}" 
+                   class="inline-flex items-center text-colombia-blue hover:text-solar-orange font-medium">
+                    Leer noticias
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-to-r from-solar-orange to-solar-yellow">
+    <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+            Mantente informado sobre la energía solar en Colombia
+        </h2>
+        <p class="text-xl text-white mb-8">
+            Consulta la normativa vigente, busca documentos específicos y sigue las últimas noticias del sector.
+        </p>
+        <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+            <a href="{% url 'regulatory:search' %}" 
+               class="inline-block bg-white text-solar-orange px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors shadow-lg">
+                <i class="fas fa-search mr-2"></i>
+                Buscar normativas
+            </a>
+            <a href="{% url 'news:home' %}" 
+               class="inline-block border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-solar-orange transition-colors">
+                <i class="fas fa-newspaper mr-2"></i>
+                Ver noticias
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

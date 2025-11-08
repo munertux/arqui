@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - Blog SIESE{% endblock %}
+
+{% block content %}
+<section class="py-16">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        <nav class="text-sm breadcrumbs">
+            <ul class="flex space-x-2 text-gray-600">
+                <li><a href="{% url 'core:home' %}" class="hover:text-colombia-blue">Inicio</a></li>
+                <li><span class="mx-2">/</span></li>
+                <li><a href="{% url 'blog:home' %}" class="hover:text-colombia-blue">Blog</a></li>
+                <li><span class="mx-2">/</span></li>
+                <li class="text-colombia-blue font-medium">{{ post.title }}</li>
+            </ul>
+        </nav>
+
+        <header class="space-y-4">
+            <div class="inline-flex items-center px-4 py-2 rounded-full bg-solar-yellow bg-opacity-20 text-colombia-blue font-semibold text-sm">
+                <i class="fas fa-bolt mr-2"></i>{{ post.category.name }}
+            </div>
+            <h1 class="text-4xl font-bold text-colombia-blue">{{ post.title }}</h1>
+        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+            <span><i class="fas fa-calendar mr-2"></i>{{ post.created_at|date:"d \d\e F \d\e Y" }}</span>
+            {% if post.author %}
+            <span><i class="fas fa-user mr-2"></i>Publicado por {{ post.author.get_full_name|default:post.author.email }}</span>
+            {% endif %}
+        </div>
+        </header>
+
+        {% if post.images.all %}
+        <section class="grid sm:grid-cols-2 gap-4">
+            {% for image in post.images.all %}
+            <figure class="bg-white rounded-xl overflow-hidden shadow border border-gray-100">
+                <img src="{{ image.image.url }}" alt="{{ image.caption|default:post.title }}" class="w-full h-60 object-cover">
+                {% if image.caption %}
+                <figcaption class="px-4 py-2 text-sm text-gray-600">{{ image.caption }}</figcaption>
+                {% endif %}
+            </figure>
+            {% endfor %}
+        </section>
+        {% endif %}
+
+        <section class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 space-y-6">
+            <h2 class="text-2xl font-semibold text-colombia-blue">Historia completa</h2>
+            <div class="prose max-w-none text-gray-700 whitespace-pre-line">
+                {{ post.content|linebreaks }}
+            </div>
+        </section>
+
+        <section id="comentarios" class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-semibold text-colombia-blue">Comentarios</h2>
+                <span class="text-sm text-gray-500">{{ comment_count }} comentario{% if comment_count != 1 %}s{% endif %}</span>
+            </div>
+
+            <form method="post" class="space-y-4 bg-gray-50 rounded-2xl p-6" id="comment-form">
+                {% csrf_token %}
+                {{ comment_form.non_field_errors }}
+                <input type="hidden" name="parent_id" id="parent-id-field" value="">
+                {% if comment_form.name.widget.input_type != 'hidden' %}
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-semibold text-gray-700 mb-2 block">Tu nombre</label>
+                        {{ comment_form.name }}
+                        {% for error in comment_form.name.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-gray-700 mb-2 block">Correo electrónico</label>
+                        {{ comment_form.email }}
+                        {% for error in comment_form.email.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                    {{ comment_form.name }}
+                    {{ comment_form.email }}
+                {% endif %}
+                <div>
+                    <label class="text-sm font-semibold text-gray-700 mb-2 block">Tu comentario</label>
+                    {{ comment_form.content }}
+                    {% for error in comment_form.content.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="flex items-center gap-3">
+                    <button type="submit" class="px-6 py-3 rounded-lg bg-colombia-blue text-white font-semibold hover:bg-blue-800 transition">Publicar comentario</button>
+                    <button type="button" id="cancel-reply" class="hidden px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:border-solar-yellow transition">Cancelar respuesta</button>
+                </div>
+            </form>
+
+            <div class="space-y-4" id="comments-container">
+                {% if comments %}
+                    {% for comment in comments %}
+                        {% include 'blog/_comment.html' with comment=comment only %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-gray-500 text-sm">Aún no hay comentarios. ¡Sé la primera persona en opinar!</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <button type="button" id="like-button" class="inline-flex items-center px-4 py-2 rounded-lg border {{ user_has_reacted|yesno:'border-solar-yellow bg-solar-yellow bg-opacity-10 text-colombia-blue,border-gray-300 text-gray-600 hover:border-solar-yellow' }} transition">
+                    <i class="fas fa-heart mr-2"></i>
+                    <span id="like-label">{{ user_has_reacted|yesno:'Te gusta,Me gusta' }}</span>
+                    <span class="ml-2 px-2 py-1 text-xs rounded bg-gray-100 text-gray-600" id="like-count">{{ reaction_count }}</span>
+                </button>
+                <button type="button" id="report-button" class="inline-flex items-center px-4 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition">
+                    <i class="fas fa-flag mr-2"></i>Reportar
+                </button>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{% url 'blog:home' %}" class="text-colombia-blue font-semibold hover:text-solar-orange"><i class="fas fa-arrow-left mr-2"></i>Regresar al blog</a>
+                <a href="{% url 'blog:create' %}" class="inline-flex items-center px-5 py-3 bg-solar-yellow text-colombia-blue rounded-lg font-semibold hover:bg-yellow-400 transition"><i class="fas fa-pen mr-2"></i>Compartir mi experiencia</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div id="report-modal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold text-colombia-blue"><i class="fas fa-flag mr-2"></i>Reportar publicación</h3>
+            <button type="button" id="close-report" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="post" action="{% url 'blog:report' post.slug %}" class="space-y-4">
+            {% csrf_token %}
+            <p class="text-sm text-gray-600">Cuéntanos por qué consideras que este contenido debería ser revisado. El equipo moderará el reporte lo antes posible.</p>
+            {{ report_form.reason }}
+            <div class="flex items-center justify-end gap-3">
+                <button type="button" id="cancel-report" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:border-solar-yellow transition">Cancelar</button>
+                <button type="submit" class="px-5 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition">Enviar reporte</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('comment-form');
+    const parentInput = document.getElementById('parent-id-field');
+    const cancelReply = document.getElementById('cancel-reply');
+
+    document.querySelectorAll('.reply-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const commentId = button.dataset.comment;
+            parentInput.value = commentId;
+            cancelReply.classList.remove('hidden');
+            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    cancelReply.addEventListener('click', () => {
+        parentInput.value = '';
+        cancelReply.classList.add('hidden');
+    });
+
+    document.querySelectorAll('.toggle-replies').forEach(button => {
+        button.addEventListener('click', () => {
+            const target = document.getElementById(button.dataset.target);
+            if (!target) return;
+            target.classList.toggle('hidden');
+            button.innerHTML = target.classList.contains('hidden')
+                ? '<i class="fas fa-comments mr-1"></i>Ver respuestas'
+                : '<i class="fas fa-comments mr-1"></i>Ocultar respuestas';
+        });
+    });
+
+    const likeButton = document.getElementById('like-button');
+    if (likeButton) {
+        likeButton.addEventListener('click', function() {
+            fetch('{% url 'blog:toggle_reaction' post.slug %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(response => {
+                if (response.redirected || response.status === 403) {
+                    window.location.href = '{% url 'account_login' %}?next={{ post.get_absolute_url }}';
+                    return null;
+                }
+                return response.json();
+            }).then(data => {
+                if (!data) return;
+                const count = document.getElementById('like-count');
+                const label = document.getElementById('like-label');
+                if (data.reacted) {
+                    likeButton.classList.add('border-solar-yellow', 'bg-solar-yellow', 'bg-opacity-10', 'text-colombia-blue');
+                    likeButton.classList.remove('border-gray-300', 'text-gray-600');
+                    label.textContent = 'Te gusta';
+                } else {
+                    likeButton.classList.remove('border-solar-yellow', 'bg-solar-yellow', 'bg-opacity-10', 'text-colombia-blue');
+                    likeButton.classList.add('border-gray-300', 'text-gray-600');
+                    label.textContent = 'Me gusta';
+                }
+                count.textContent = data.count;
+            });
+        });
+    }
+
+    const reportButton = document.getElementById('report-button');
+    const reportModal = document.getElementById('report-modal');
+    const closeReport = document.getElementById('close-report');
+    const cancelReport = document.getElementById('cancel-report');
+
+    function toggleReport(open) {
+        if (open) {
+            reportModal.classList.remove('hidden');
+            reportModal.classList.add('flex');
+        } else {
+            reportModal.classList.add('hidden');
+            reportModal.classList.remove('flex');
+        }
+    }
+
+    reportButton?.addEventListener('click', () => toggleReport(true));
+    closeReport?.addEventListener('click', () => toggleReport(false));
+    cancelReport?.addEventListener('click', () => toggleReport(false));
+    reportModal?.addEventListener('click', (event) => {
+        if (event.target === reportModal) {
+            toggleReport(false);
+        }
+    });
+
+    const commentReports = document.querySelectorAll('.report-comment');
+    const commentReportModal = document.getElementById('comment-report-modal');
+    const closeCommentReport = document.getElementById('close-comment-report');
+    const cancelCommentReport = document.getElementById('cancel-comment-report');
+    const commentReportForm = document.getElementById('comment-report-form');
+    const commentReportReason = document.getElementById('comment-report-reason');
+    const commentReportId = document.getElementById('comment-report-id');
+
+    function toggleCommentReport(open) {
+        if (open) {
+            commentReportModal.classList.remove('hidden');
+            commentReportModal.classList.add('flex');
+        } else {
+            commentReportModal.classList.add('hidden');
+            commentReportModal.classList.remove('flex');
+            commentReportForm.reset();
+        }
+    }
+
+    commentReports.forEach(button => {
+        button.addEventListener('click', () => {
+            commentReportId.value = button.dataset.comment;
+            toggleCommentReport(true);
+        });
+    });
+
+    closeCommentReport?.addEventListener('click', () => toggleCommentReport(false));
+    cancelCommentReport?.addEventListener('click', () => toggleCommentReport(false));
+    commentReportModal?.addEventListener('click', (event) => {
+        if (event.target === commentReportModal) {
+            toggleCommentReport(false);
+        }
+    });
+
+    commentReportForm?.addEventListener('submit', function(event) {
+        event.preventDefault();
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: new URLSearchParams({
+                action: 'report_comment',
+                comment_id: commentReportId.value,
+                reason: commentReportReason.value
+            })
+        }).then(response => response.json()).then(data => {
+            if (data.success) {
+                toggleCommentReport(false);
+                alert('Gracias por tu reporte. Revisaremos el comentario.');
+            } else {
+                alert(data.error || 'No pudimos enviar el reporte.');
+            }
+        }).catch(() => {
+            alert('Hubo un problema al enviar el reporte.');
+        });
+    });
+});
+</script>
+{% endblock %}
+
+<div id="comment-report-modal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold text-colombia-blue"><i class="fas fa-flag mr-2"></i>Reportar comentario</h3>
+            <button type="button" id="close-comment-report" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="comment-report-form" class="space-y-4">
+            <p class="text-sm text-gray-600">Describe el motivo por el cual este comentario debería revisarse.</p>
+            <input type="hidden" id="comment-report-id">
+            <textarea id="comment-report-reason" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" rows="4"></textarea>
+            <div class="flex items-center justify-end gap-3">
+                <button type="button" id="cancel-comment-report" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:border-solar-yellow transition">Cancelar</button>
+                <button type="submit" class="px-5 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition">Enviar reporte</button>
+            </div>
+        </form>
+    </div>
+</div>

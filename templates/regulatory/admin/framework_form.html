@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar normativa{% else %}Nueva normativa{% endif %} - SIESE{% endblock %}
+
+{% block content %}
+<section class="py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-10">
+            <header class="mb-8">
+                <span class="inline-flex items-center px-4 py-2 bg-colombia-blue bg-opacity-10 rounded-full text-colombia-blue font-semibold text-sm">
+                    <i class="fas fa-gavel mr-2"></i>
+                    {% if object %}Editar normativa{% else %}Nueva normativa{% endif %}
+                </span>
+                <h1 class="mt-4 text-3xl font-bold text-colombia-blue">
+                    {% if object %}
+                        Actualizar información oficial
+                    {% else %}
+                        Registrar un marco legal para scraping
+                    {% endif %}
+                </h1>
+                <p class="mt-2 text-gray-600">
+                    {% if object %}
+                        Ajusta los datos básicos y la URL oficial. Luego puedes ejecutar el scraping desde el listado administrativo.
+                    {% else %}
+                        Completa los campos requeridos y proporciona la URL oficial de Función Pública u otra fuente confiable. Después podrás ejecutar el scraping automático.
+                    {% endif %}
+                </p>
+            </header>
+
+            <form method="post" class="space-y-6" id="legal-framework-form" data-framework-id="{{ object.pk|default_if_none:'' }}">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="rounded-lg border border-red-300 bg-red-50 text-red-700 px-4 py-3">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Título</label>
+                        {{ form.title }}
+                        {% for error in form.title.errors %}
+                            <p class="text-sm text-red-600 mt-2">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de documento</label>
+                        {{ form.document_type }}
+                        {% for error in form.document_type.errors %}
+                            <p class="text-sm text-red-600 mt-2">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Número de documento</label>
+                        {{ form.document_number }}
+                        {% for error in form.document_number.errors %}
+                            <p class="text-sm text-red-600 mt-2">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Año</label>
+                        {{ form.year }}
+                        {% for error in form.year.errors %}
+                            <p class="text-sm text-red-600 mt-2">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">URL oficial (Fuente del scraping)</label>
+                    {{ form.official_url }}
+                    <p class="mt-2 text-xs text-gray-500">Utiliza la URL oficial desde donde el sistema realizará el scraping, por ejemplo: https://www.funcionpublica.gov.co/eva/gestornormativo/...</p>
+                    {% for error in form.official_url.errors %}
+                        <p class="text-sm text-red-600 mt-2">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h2 class="text-sm font-semibold text-gray-700 mb-1">Asistente IA para contenido</h2>
+                            <p class="text-xs text-gray-500">Genera automáticamente resumen, objetivos y beneficios usando la URL oficial.</p>
+                        </div>
+                        <button type="button"
+                                id="generate-ai-btn"
+                                data-endpoint="{% url 'regulatory:admin_framework_generate_ai' %}"
+                                class="inline-flex items-center justify-center px-4 py-2 bg-colombia-blue text-white text-sm font-semibold rounded-lg hover:bg-blue-800 transition">
+                            <i class="fas fa-magic mr-2"></i>
+                            Generar con IA
+                        </button>
+                    </div>
+                    <div id="ai-status" class="mt-3 text-xs text-gray-500 hidden"></div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Resumen</label>
+                        {{ form.summary }}
+                        {% for error in form.summary.errors %}
+                            <p class="text-sm text-red-600 mt-2">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Objetivo principal</label>
+                        {{ form.main_objective }}
+                        {% for error in form.main_objective.errors %}
+                            <p class="text-sm text-red-600 mt-2">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Beneficios para empresas</label>
+                        {{ form.benefits_companies }}
+                        {% for error in form.benefits_companies.errors %}
+                            <p class="text-sm text-red-600 mt-2">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Beneficios para ciudadanos</label>
+                        {{ form.benefits_citizens }}
+                        {% for error in form.benefits_citizens.errors %}
+                            <p class="text-sm text-red-600 mt-2">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    {{ form.is_active }}
+                    <label class="ml-2 text-sm text-gray-600">Mostrar esta normativa en el portal público</label>
+                </div>
+
+                <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-100">
+                    <a href="{% url 'regulatory:admin_framework_list' %}" class="px-5 py-2.5 rounded-lg border border-gray-200 text-gray-600 hover:border-solar-yellow">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="inline-flex items-center px-6 py-2.5 rounded-lg bg-colombia-blue text-white font-semibold hover:bg-blue-800">
+                        <i class="fas fa-save mr-2"></i>
+                        Guardar cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    (function() {
+        const form = document.getElementById('legal-framework-form');
+        const aiButton = document.getElementById('generate-ai-btn');
+        const statusBox = document.getElementById('ai-status');
+
+        if (!form || !aiButton || !statusBox) {
+            return;
+        }
+
+        const csrfTokenInput = form.querySelector('input[name="csrfmiddlewaretoken"]');
+        const summaryField = document.getElementById('id_summary');
+        const objectiveField = document.getElementById('id_main_objective');
+        const benefitsCompaniesField = document.getElementById('id_benefits_companies');
+        const benefitsCitizensField = document.getElementById('id_benefits_citizens');
+
+        const showStatus = (message, type = 'info') => {
+            statusBox.textContent = message;
+            statusBox.classList.remove('hidden', 'text-red-600', 'text-emerald-600', 'text-gray-500');
+            if (type === 'error') {
+                statusBox.classList.add('text-red-600');
+            } else if (type === 'success') {
+                statusBox.classList.add('text-emerald-600');
+            } else {
+                statusBox.classList.add('text-gray-500');
+            }
+        };
+
+        const resetStatus = () => {
+            statusBox.textContent = '';
+            statusBox.classList.add('hidden');
+            statusBox.classList.remove('text-red-600', 'text-emerald-600', 'text-gray-500');
+        };
+
+        aiButton.addEventListener('click', async () => {
+            if (!csrfTokenInput) {
+                return;
+            }
+
+            const officialUrl = document.getElementById('id_official_url')?.value.trim();
+            const documentNumber = document.getElementById('id_document_number')?.value.trim();
+            const documentType = document.getElementById('id_document_type')?.value;
+            const year = document.getElementById('id_year')?.value;
+            const frameworkId = form.dataset.frameworkId || null;
+
+            if (!officialUrl) {
+                showStatus('Debes indicar la URL oficial antes de generar contenido.', 'error');
+                return;
+            }
+
+            if (!documentNumber || !year) {
+                showStatus('Completa número de documento y año antes de generar contenido.', 'error');
+                return;
+            }
+
+            aiButton.disabled = true;
+            aiButton.classList.add('opacity-60', 'cursor-not-allowed');
+            showStatus('Generando contenido con IA, esto puede tardar unos segundos…');
+
+            try {
+                const response = await fetch(aiButton.dataset.endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfTokenInput.value,
+                    },
+                    body: JSON.stringify({
+                        framework_id: frameworkId,
+                        official_url: officialUrl,
+                        document_number: documentNumber,
+                        document_type: documentType,
+                        year: year,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showStatus(data.error || 'No fue posible generar contenido.', 'error');
+                    return;
+                }
+
+                if (summaryField) summaryField.value = data.summary || summaryField.value;
+                if (objectiveField) objectiveField.value = data.main_objective || objectiveField.value;
+                if (benefitsCompaniesField) benefitsCompaniesField.value = data.benefits_companies || benefitsCompaniesField.value;
+                if (benefitsCitizensField) benefitsCitizensField.value = data.benefits_citizens || benefitsCitizensField.value;
+
+                showStatus('Contenido generado con éxito. Revisa y ajusta antes de guardar.', 'success');
+            } catch (error) {
+                showStatus('Ocurrió un error inesperado al generar contenido.', 'error');
+            } finally {
+                aiButton.disabled = false;
+                aiButton.classList.remove('opacity-60', 'cursor-not-allowed');
+            }
+        });
+    })();
+</script>
+{% endblock %}

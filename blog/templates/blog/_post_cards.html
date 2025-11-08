@@ -1,0 +1,42 @@
+{% for post in posts %}
+<article class="bg-white rounded-2xl shadow-lg border border-gray-100 hover:border-solar-yellow transition overflow-hidden">
+    {% if post.images.first %}
+    <div class="h-48 bg-gray-200 overflow-hidden">
+        <img src="{{ post.images.first.image.url }}" alt="{{ post.images.first.caption|default:post.title }}" class="w-full h-full object-cover">
+    </div>
+    {% endif %}
+    <div class="p-6 space-y-4">
+        <div class="flex items-center justify-between text-sm text-gray-500">
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-solar-yellow bg-opacity-20 text-colombia-blue font-semibold">
+                <i class="fas fa-bolt mr-2"></i>{{ post.category.name }}
+            </span>
+            <span><i class="fas fa-calendar mr-1"></i>{{ post.created_at|date:"d/m/Y" }}</span>
+        </div>
+        <h3 class="text-xl font-bold text-colombia-blue">
+            <a href="{{ post.get_absolute_url }}" class="hover:text-solar-orange transition">{{ post.title }}</a>
+        </h3>
+        <p class="text-gray-600 text-sm line-clamp-4">{{ post.content|truncatewords:35 }}</p>
+        <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center gap-3">
+                {% if post.author %}
+                <span class="text-gray-500"><i class="fas fa-user mr-2"></i>{{ post.author.get_full_name|default:post.author.email }}</span>
+                {% endif %}
+                <span class="text-gray-400"><i class="fas fa-comments mr-1"></i>{{ post.comment_count }}</span>
+                <span class="text-gray-400"><i class="fas fa-heart mr-1"></i>{{ post.reaction_count }}</span>
+            </div>
+            <a href="{{ post.get_absolute_url }}" class="text-colombia-blue font-semibold hover:text-solar-orange">Leer más<i class="fas fa-arrow-right ml-2"></i></a>
+        </div>
+    </div>
+</article>
+{% empty %}
+<div class="col-span-full bg-white rounded-2xl shadow-md border border-gray-100 py-16 text-center">
+    <i class="fas fa-seedling text-4xl text-gray-300 mb-4"></i>
+    <h3 class="text-xl font-semibold text-gray-600 mb-2">No encontramos publicaciones con esos filtros.</h3>
+    <p class="text-gray-500">Ajusta tu búsqueda o intenta con otras palabras clave.</p>
+    {% if request.user.is_authenticated %}
+    <a href="{% url 'blog:create' %}" class="mt-4 inline-flex items-center justify-center px-5 py-3 rounded-lg bg-colombia-blue text-white font-semibold hover:bg-blue-800 transition">
+        <i class="fas fa-pen mr-2"></i>Compartir experiencia
+    </a>
+    {% endif %}
+</div>
+{% endfor %}

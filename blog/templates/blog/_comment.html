@@ -1,0 +1,31 @@
+<div class="comment border border-gray-200 rounded-xl p-4 bg-white space-y-3" id="comment-{{ comment.id }}">
+    <div class="flex items-center justify-between text-sm text-gray-500">
+        <span class="font-semibold text-colombia-blue">{{ comment.display_name }}</span>
+        <span><i class="fas fa-clock mr-1"></i>{{ comment.created_at|date:"d/m/Y H:i" }}</span>
+    </div>
+    <p class="text-gray-700 text-sm">{{ comment.content|linebreaks }}</p>
+    <div class="flex items-center gap-3 text-xs text-gray-500">
+        <button type="button" class="reply-button hover:text-colombia-blue font-semibold" data-comment="{{ comment.id }}">
+            <i class="fas fa-reply mr-1"></i>Responder
+        </button>
+        <button type="button" class="report-comment hover:text-red-500 font-semibold" data-comment="{{ comment.id }}">
+            <i class="fas fa-flag mr-1"></i>Reportar
+        </button>
+        {% with replies=comment.active_replies %}
+            {% if replies %}
+            <button type="button" class="toggle-replies hover:text-colombia-blue font-semibold" data-target="replies-{{ comment.id }}">
+                <i class="fas fa-comments mr-1"></i>Ver respuestas ({{ replies|length }})
+            </button>
+            {% endif %}
+        {% endwith %}
+    </div>
+    {% with replies=comment.active_replies %}
+        {% if replies %}
+        <div class="ml-6 mt-3 hidden space-y-3" id="replies-{{ comment.id }}">
+            {% for reply in replies %}
+                {% include 'blog/_comment.html' with comment=reply only %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+</div>

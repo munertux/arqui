@@ -1,0 +1,95 @@
+/* SIESE - Custom Styles */
+
+/* Colores personalizados de Colombia y Energía Solar */
+:root {
+    --solar-yellow: #FFD700;
+    --solar-orange: #FF8C00;
+    --earth-green: #228B22;
+    --sky-blue: #87CEEB;
+    --colombia-blue: #003A70;
+    --colombia-yellow: #FFD700;
+    --colombia-red: #CE1126;
+}
+
+/* Animaciones personalizadas */
+@keyframes solar-glow {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); 
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3); 
+    }
+}
+
+.solar-glow {
+    animation: solar-glow 2s ease-in-out infinite;
+}
+
+/* Botones personalizados */
+.btn-solar {
+    background: linear-gradient(135deg, var(--solar-yellow), var(--solar-orange));
+    color: var(--colombia-blue);
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-solar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
+}
+
+/* Cards con efectos */
+.card-hover {
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Elementos de energía solar */
+.energy-meter {
+    background: linear-gradient(45deg, var(--earth-green), var(--sky-blue));
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+}
+
+.energy-meter::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: conic-gradient(from 0deg, transparent 0deg, var(--solar-yellow) 180deg, transparent 360deg);
+    border-radius: 50%;
+    mask: radial-gradient(circle at center, transparent 60%, black 60%);
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .mobile-hidden {
+        display: none !important;
+    }
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--colombia-blue);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--solar-orange);
+}

@@ -1,0 +1,15 @@
+{% if is_paginated %}
+<div class="flex justify-center mt-8">
+    <div class="inline-flex items-center space-x-2">
+        {% if page_obj.has_previous %}
+        <a href="?{% if selected_ordering %}ordering={{ selected_ordering }}&amp;{% endif %}{% if search_query %}q={{ search_query|urlencode }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" class="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:border-solar-yellow">Anterior</a>
+        {% endif %}
+        <span class="px-3 py-2 text-sm bg-colombia-blue text-white rounded-lg">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?{% if selected_ordering %}ordering={{ selected_ordering }}&amp;{% endif %}{% if search_query %}q={{ search_query|urlencode }}&amp;{% endif %}page={{ page_obj.next_page_number }}" class="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:border-solar-yellow">Siguiente</a>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div></div>
+{% endif %}

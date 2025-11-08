@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}Marco Legal - Normativas de Energías Renovables{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="container mx-auto px-4">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-colombia-blue mb-4">Marco Legal</h1>
+            <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                Explora todas las normativas que regulan el desarrollo de energías renovables en Colombia
+            </p>
+        </div>
+
+        <div class="flex justify-center mb-6">
+            <a href="{% url 'regulatory:search' %}" class="inline-flex items-center px-6 py-3 bg-colombia-blue text-white rounded-lg font-semibold hover:bg-blue-800 transition">
+                <i class="fas fa-search mr-2"></i>
+                Abrir buscador avanzado
+            </a>
+        </div>
+
+        <!-- Filtros -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <div class="flex flex-wrap gap-4 justify-center">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-list mr-2"></i>Todas
+                </button>
+                <button class="filter-btn" data-filter="ley">
+                    <i class="fas fa-gavel mr-2"></i>Leyes
+                </button>
+                <button class="filter-btn" data-filter="decreto">
+                    <i class="fas fa-file-signature mr-2"></i>Decretos
+                </button>
+                <button class="filter-btn" data-filter="resolucion">
+                    <i class="fas fa-clipboard-list mr-2"></i>Resoluciones
+                </button>
+            </div>
+        </div>
+
+        <!-- Lista de normativas -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for framework in legal_frameworks %}
+            <div class="legal-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow" 
+                 data-type="{{ framework.document_type }}">
+                <div class="p-6">
+                    <!-- Badge del tipo -->
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="badge-{{ framework.document_type }} px-3 py-1 rounded-full text-sm font-semibold">
+                            {{ framework.get_document_type_display }} {{ framework.document_number }}
+                        </span>
+                        <span class="text-sm text-gray-500">{{ framework.year }}</span>
+                    </div>
+                    
+                    <!-- Título -->
+                    <h3 class="text-lg font-bold text-gray-800 mb-1 line-clamp-2">
+                        {{ framework.title }}
+                    </h3>
+                    {% if framework.issuing_entity %}
+                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">{{ framework.issuing_entity }}</p>
+                    {% endif %}
+                    
+                    <!-- Resumen -->
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                        {{ framework.summary|truncatewords:24 }}
+                    </p>
+                    
+                    <!-- Última actualización -->
+                    {% if framework.last_scraped %}
+                    <div class="flex items-center text-xs text-gray-500 mb-4">
+                        <i class="fas fa-clock mr-1"></i>
+                        Actualizado: {{ framework.last_scraped|date:"d/m/Y" }}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Botones de acción -->
+                    <div class="flex gap-2">
+                        <a href="{% url 'regulatory:legal_framework_detail' document_type=framework.document_type document_number=framework.document_number year=framework.year %}"
+                           class="flex-1 bg-solar-yellow text-colombia-blue px-4 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-colors text-center">
+                            Ver Detalle
+                        </a>
+                        <a href="{{ framework.official_url }}" target="_blank"
+                           class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-500 mb-2">No se encontraron normativas</h3>
+                <p class="text-gray-400">Aún no hay marcos legales disponibles en esta categoría.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        {% if is_paginated %}
+        <div class="flex justify-center mt-12">
+            <nav class="flex space-x-2">
+                {% if page_obj.has_previous %}
+                <a href="?page=1" class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">Primera</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">Anterior</a>
+                {% endif %}
+                
+                <span class="px-4 py-2 bg-colombia-blue text-white border rounded-lg">
+                    {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">Siguiente</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50">Última</a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+/* Estilos para filtros */
+.filter-btn {
+    @apply px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors;
+}
+
+.filter-btn.active {
+    @apply bg-colombia-blue text-white;
+}
+
+/* Badges por tipo de documento */
+.badge-ley {
+    @apply bg-red-100 text-red-800;
+}
+
+.badge-decreto {
+    @apply bg-blue-100 text-blue-800;
+}
+
+.badge-resolucion {
+    @apply bg-green-100 text-green-800;
+}
+
+.badge-circular {
+    @apply bg-yellow-100 text-yellow-800;
+}
+
+.badge-guia {
+    @apply bg-purple-100 text-purple-800;
+}
+
+/* Limitador de líneas */
+.line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+</style>
+
+<script>
+// Filtros de normativas
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const legalCards = document.querySelectorAll('.legal-card');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+            
+            // Actualizar botones activos
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filtrar tarjetas
+            legalCards.forEach(card => {
+                if (filter === 'all' || card.dataset.type === filter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

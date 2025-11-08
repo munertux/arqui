@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Recursos Educativos - SIESE{% endblock %}
+
+{% block content %}
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <header class="bg-white rounded-3xl shadow-xl border border-gray-100 p-10">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+                <div class="max-w-2xl">
+                    <span class="inline-flex items-center px-4 py-2 bg-solar-yellow bg-opacity-20 rounded-full text-colombia-blue font-semibold">
+                        <i class="fas fa-graduation-cap mr-2"></i>
+                        Academia Solar SIESE
+                    </span>
+                    <h1 class="mt-6 text-4xl font-bold text-colombia-blue">
+                        Aprende sobre energía solar y transición energética en Colombia
+                    </h1>
+                    <p class="mt-4 text-lg text-gray-600">
+                        Accede a guías, artículos y material interactivo para entender incentivos, normativas y tecnologías renovables.
+                    </p>
+                </div>
+                <div class="flex flex-col gap-4 w-full max-w-sm">
+                    <a href="{% url 'regulatory:legal_framework_list' %}" class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-colombia-blue text-white font-semibold hover:bg-blue-800 transition">
+                        <i class="fas fa-gavel mr-2"></i>
+                        Explorar marco normativo
+                    </a>
+                    <a href="{% url 'simulator:home' %}" class="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-solar-yellow text-colombia-blue font-semibold hover:bg-yellow-400 transition">
+                        <i class="fas fa-calculator mr-2"></i>
+                        Ir al simulador solar
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <section class="grid lg:grid-cols-3 gap-8">
+            <article class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:border-solar-yellow transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-colombia-blue">Fundamentos de la transición energética</h2>
+                        <p class="mt-2 text-sm text-gray-500">Conceptos clave, glosario y contexto normativo.</p>
+                    </div>
+                    <span class="flex h-12 w-12 items-center justify-center rounded-full bg-solar-yellow bg-opacity-25 text-solar-orange text-xl">
+                        <i class="fas fa-lightbulb"></i>
+                    </span>
+                </div>
+                <a href="{% url 'educational:category' %}" class="mt-6 inline-flex items-center text-sm font-semibold text-colombia-blue hover:text-solar-orange">
+                    Ver contenidos <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </article>
+
+            <article class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:border-solar-yellow transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-colombia-blue">Financiación y beneficios</h2>
+                        <p class="mt-2 text-sm text-gray-500">Incentivos tributarios, acceso a fondos y casos de éxito.</p>
+                    </div>
+                    <span class="flex h-12 w-12 items-center justify-center rounded-full bg-earth-green bg-opacity-20 text-earth-green text-xl">
+                        <i class="fas fa-piggy-bank"></i>
+                    </span>
+                </div>
+                <a href="{% url 'educational:category' %}" class="mt-6 inline-flex items-center text-sm font-semibold text-colombia-blue hover:text-solar-orange">
+                    Ver contenidos <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </article>
+
+            <article class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:border-solar-yellow transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-colombia-blue">Implementación técnica</h2>
+                        <p class="mt-2 text-sm text-gray-500">Guías sobre dimensionamiento, operación y mantenimiento.</p>
+                    </div>
+                    <span class="flex h-12 w-12 items-center justify-center rounded-full bg-sky-blue bg-opacity-25 text-sky-blue text-xl">
+                        <i class="fas fa-tools"></i>
+                    </span>
+                </div>
+                <a href="{% url 'educational:category' %}" class="mt-6 inline-flex items-center text-sm font-semibold text-colombia-blue hover:text-solar-orange">
+                    Ver contenidos <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </article>
+        </section>
+    </div>
+</section>
+{% endblock %}

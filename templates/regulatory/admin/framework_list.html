@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Normativas - SIESE{% endblock %}
+
+{% block content %}
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+                <h1 class="text-3xl font-bold text-colombia-blue">Gestión de normativas</h1>
+                <p class="mt-2 text-gray-600 max-w-2xl">
+                    Administra las leyes, decretos y resoluciones disponibles en SIESE. Crea nuevas normativas indicando la URL oficial para el scraping y actualiza el contenido cuando haya cambios regulatorios.
+                </p>
+            </div>
+            <a href="{% url 'regulatory:admin_framework_create' %}" class="inline-flex items-center px-5 py-3 rounded-lg bg-solar-yellow text-colombia-blue font-semibold hover:bg-yellow-400 transition">
+                <i class="fas fa-plus-circle mr-2"></i>
+                Registrar nuevo marco legal
+            </a>
+        </header>
+
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead class="bg-gray-50">
+                        <tr class="text-left text-gray-600 uppercase text-xs font-semibold tracking-wider">
+                            <th class="px-6 py-3">Documento</th>
+                            <th class="px-6 py-3">Título</th>
+                            <th class="px-6 py-3">Entidad emisora</th>
+                            <th class="px-6 py-3">URL oficial</th>
+                            <th class="px-6 py-3">Actualizado</th>
+                            <th class="px-6 py-3 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for framework in frameworks %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                                <div class="font-semibold text-colombia-blue">
+                                    {{ framework.get_document_type_display }} {{ framework.document_number }}
+                                </div>
+                                <div class="text-xs text-gray-500">{{ framework.year }}</div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-700">
+                                <div class="font-medium">{{ framework.title }}</div>
+                                <div class="text-xs text-gray-500 line-clamp-2">{{ framework.summary|truncatewords:18 }}</div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-600 whitespace-nowrap">
+                                {% if framework.issuing_entity %}
+                                    {{ framework.issuing_entity }}
+                                {% else %}
+                                    <span class="text-xs text-gray-400">No especificada</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-gray-600">
+                                {% if framework.official_url %}
+                                    <a href="{{ framework.official_url }}" target="_blank" class="text-colombia-blue hover:text-solar-orange break-all text-xs">
+                                        {{ framework.official_url }}
+                                    </a>
+                                {% else %}
+                                    <span class="inline-flex items-center text-xs text-red-600">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                                        Sin URL oficial
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-gray-600 whitespace-nowrap">
+                                {% if framework.last_scraped %}
+                                    {{ framework.last_scraped|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    <span class="text-xs text-gray-400">Nunca</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex justify-end space-x-2">
+                                    <a href="{% url 'regulatory:admin_framework_update' framework.pk %}" class="inline-flex items-center px-3 py-2 text-xs font-semibold bg-white border border-gray-200 rounded-lg hover:border-solar-yellow text-gray-700">
+                                        <i class="fas fa-edit mr-2"></i>
+                                        Editar
+                                    </a>
+                                    <form method="post" action="{% url 'regulatory:admin_framework_scrape' framework.pk %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="inline-flex items-center px-3 py-2 text-xs font-semibold bg-colombia-blue text-white rounded-lg hover:bg-blue-800">
+                                            <i class="fas fa-sync-alt mr-2"></i>
+                                            Actualizar
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'regulatory:admin_framework_delete' framework.pk %}" class="inline" onsubmit="return confirm('¿Seguro que deseas eliminar esta normativa? Esta acción no se puede deshacer.');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="inline-flex items-center px-3 py-2 text-xs font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                            <i class="fas fa-trash-alt mr-2"></i>
+                                            Eliminar
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                                <i class="fas fa-inbox mb-3 text-3xl text-gray-300"></i>
+                                <p class="font-semibold">Aún no hay marcos legales registrados.</p>
+                                <p class="text-sm">Crea el primero usando el botón “Registrar nuevo marco legal”.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if is_paginated %}
+        <div class="flex justify-center">
+            <div class="inline-flex items-center space-x-2">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:border-solar-yellow">Anterior</a>
+                {% endif %}
+                <span class="px-3 py-2 text-sm bg-colombia-blue text-white rounded-lg">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:border-solar-yellow">Siguiente</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

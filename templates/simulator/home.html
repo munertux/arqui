@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - SIESE{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="bg-gradient-to-r from-colombia-blue to-blue-800 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6">
+                <i class="fas fa-calculator text-solar-yellow mr-3"></i>
+                Simulador Solar
+            </h1>
+            <p class="text-xl opacity-90 max-w-3xl mx-auto">
+                Calcula el potencial de energía solar para tu hogar o empresa. 
+                Descubre cuánto puedes ahorrar y contribuir al medio ambiente.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Simulation Form -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+                Simulación Rápida
+            </h2>
+            <p class="text-center text-gray-600 mb-8">
+                Ingresa algunos datos básicos para obtener una estimación inicial
+            </p>
+            
+            <form class="space-y-6" method="post" action="#">
+                {% csrf_token %}
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="form-label">Ubicación (Ciudad)</label>
+                        <select class="form-input" name="location" required>
+                            <option value="">Selecciona tu ciudad</option>
+                            {% for location in locations %}
+                            <option value="{{ location.pk }}">{{ location.city }}, {{ location.department }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Consumo mensual (kWh)</label>
+                        <input type="number" class="form-input" name="monthly_consumption" 
+                               placeholder="300" min="50" max="5000" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Presupuesto disponible (COP)</label>
+                        <input type="number" class="form-input" name="budget" 
+                               placeholder="15000000" min="5000000" max="100000000" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Área disponible (m²)</label>
+                        <input type="number" class="form-input" name="available_area" 
+                               placeholder="30" min="10" max="200" required>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn-solar px-8 py-3 text-lg">
+                        <i class="fas fa-calculator mr-2"></i>
+                        Calcular Estimación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- My Systems Section (for logged-in users) -->
+{% if user.is_authenticated %}
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">Mis Sistemas Solares</h2>
+            <a href="{% url 'simulator:create_system' %}" class="btn-solar">
+                <i class="fas fa-plus mr-2"></i>
+                Crear Nuevo Sistema
+            </a>
+        </div>
+        
+        {% if recent_systems %}
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for system in recent_systems %}
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">{{ system.name }}</h3>
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                        {{ system.get_system_type_display }}
+                    </span>
+                </div>
+                <div class="space-y-2 text-sm text-gray-600 mb-4">
+                    <div><i class="fas fa-map-marker-alt mr-2"></i>{{ system.location }}</div>
+                    <div><i class="fas fa-solar-panel mr-2"></i>{{ system.num_panels }} paneles</div>
+                    <div><i class="fas fa-bolt mr-2"></i>{{ system.total_power }} kW</div>
+                    <div><i class="fas fa-calendar mr-2"></i>{{ system.created_at|date:"d/m/Y" }}</div>
+                </div>
+                <div class="flex space-x-2">
+                    <a href="{% url 'simulator:simulate' system.pk %}" 
+                       class="flex-1 bg-colombia-blue text-white text-center py-2 rounded hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-play mr-1"></i> Simular
+                    </a>
+                    <a href="{% url 'monitoring:system_detail' system.pk %}" 
+                       class="flex-1 bg-earth-green text-white text-center py-2 rounded hover:bg-green-700 transition-colors">
+                        <i class="fas fa-chart-line mr-1"></i> Monitor
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <i class="fas fa-solar-panel text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600 mb-4">No tienes sistemas solares aún</h3>
+            <p class="text-gray-500 mb-6">Crea tu primer sistema solar para comenzar a simular</p>
+            <a href="{% url 'simulator:create_system' %}" class="btn-solar">
+                <i class="fas fa-plus mr-2"></i>
+                Crear Mi Primer Sistema
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Benefits Section -->
+<section class="py-16 gradient-earth text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold mb-4">¿Por qué simular tu sistema solar?</h2>
+            <p class="text-xl opacity-90">
+                Obtén información precisa antes de tomar la decisión de invertir en energía solar
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="bg-solar-yellow text-colombia-blue rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-calculator text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Cálculos Precisos</h3>
+                <p class="opacity-90">
+                    Estimaciones basadas en datos reales de irradiación solar en Colombia
+                </p>
+            </div>
+            <div class="text-center">
+                <div class="bg-solar-yellow text-colombia-blue rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-money-bill-wave text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Ahorro Económico</h3>
+                <p class="opacity-90">
+                    Calcula cuánto dinero puedes ahorrar mensual y anualmente
+                </p>
+            </div>
+            <div class="text-center">
+                <div class="bg-solar-yellow text-colombia-blue rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-leaf text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3">Impacto Ambiental</h3>
+                <p class="opacity-90">
+                    Descubre cuánto CO₂ puedes evitar emitir al usar energía solar
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+{% if not user.is_authenticated %}
+<section class="py-16 bg-gray-100">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold text-gray-900 mb-6">
+            ¿Listo para crear tu sistema personalizado?
+        </h2>
+        <p class="text-xl text-gray-600 mb-8">
+            Regístrate gratis para crear sistemas personalizados, guardar simulaciones y acceder al panel de monitoreo
+        </p>
+        <div class="space-x-4">
+            <a href="{% url 'account_signup' %}" class="btn-solar text-lg">
+                <i class="fas fa-user-plus mr-2"></i>
+                Registrarse Gratis
+            </a>
+            <a href="{% url 'account_login' %}" class="bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-gray-700 transition-colors">
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                Iniciar Sesión
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

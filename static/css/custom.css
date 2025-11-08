@@ -1,0 +1,271 @@
+/* SIESE - Estilos personalizados */
+
+/* Layout global */
+.app-body {
+    background: linear-gradient(180deg, #f5f9ff 0%, #ffffff 45%);
+    color: #1f2937;
+}
+
+.app-background {
+    background: linear-gradient(180deg, rgba(0, 58, 112, 0.04) 0%, rgba(255, 215, 0, 0.05) 100%);
+}
+
+/* Animaciones para paneles solares */
+@keyframes solar-glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    }
+}
+
+.solar-panel-icon:hover {
+    animation: solar-glow 2s infinite;
+}
+
+/* Gradientes personalizados */
+.gradient-solar {
+    background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
+}
+
+.gradient-earth {
+    background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+}
+
+.gradient-sky {
+    background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+}
+
+/* Efectos de hover para tarjetas */
+.card-hover {
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Spinner de carga personalizado */
+.solar-spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #FFD700;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Alertas personalizadas */
+.alert {
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.alert i {
+    margin-right: 8px;
+}
+
+/* Botones personalizados */
+.btn-solar {
+    background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
+    color: #003A70;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-solar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 140, 0, 0.3);
+}
+
+.btn-earth {
+    background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-earth:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(34, 139, 34, 0.3);
+}
+
+/* Navegación sticky con efecto glassmorphism */
+.nav-glassmorphism {
+    backdrop-filter: blur(10px);
+    background: rgba(0, 58, 112, 0.9);
+}
+
+/* Formularios personalizados */
+.form-input {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #FFD700;
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+    }
+    
+    .card-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .dark-mode {
+        background-color: #1a1a1a;
+        color: #e2e8f0;
+    }
+    
+    .dark-mode .bg-white {
+        background-color: #2d3748;
+    }
+    
+    .dark-mode .text-gray-900 {
+        color: #e2e8f0;
+    }
+    
+    .dark-mode .text-gray-600 {
+        color: #a0aec0;
+    }
+}
+
+/* Animaciones para elementos de la página */
+.fade-in {
+    animation: fadeIn 0.8s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.8s ease-out;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slide-in-right {
+    animation: slideInRight 0.8s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Utilidades para iconos */
+.icon-lg {
+    font-size: 2rem;
+}
+
+.icon-xl {
+    font-size: 3rem;
+}
+
+.icon-solar {
+    color: #FFD700;
+}
+
+.icon-earth {
+    color: #228B22;
+}
+
+.icon-sky {
+    color: #87CEEB;
+}
+
+/* Efectos para gráficos y visualizaciones */
+.chart-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+/* Breadcrumbs personalizados */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 12px 0;
+}
+
+.breadcrumb-item {
+    color: #6b7280;
+    text-decoration: none;
+}
+
+.breadcrumb-item:hover {
+    color: #FFD700;
+}
+
+.breadcrumb-separator {
+    margin: 0 12px;
+    color: #d1d5db;
+}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle del recurso educativo - SIESE{% endblock %}
+
+{% block content %}
+<section class="py-14">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <article class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+            <h1 class="text-3xl font-bold text-colombia-blue mb-4">Recurso educativo</h1>
+            <p class="text-gray-600">Estamos preparando el contenido detallado de este recurso. Visita la <a href="{% url 'educational:home' %}" class="text-colombia-blue font-semibold hover:text-solar-orange">sección educativa</a> para explorar otros materiales disponibles.</p>
+        </article>
+    </div>
+</section>
+{% endblock %}

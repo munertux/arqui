@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión - SIESE{% endblock %}
+
+{% block content %}
+<section class="py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-8">
+                <div class="inline-flex items-center px-4 py-2 bg-colombia-blue bg-opacity-10 rounded-full text-colombia-blue font-semibold">
+                    <i class="fas fa-lock mr-2"></i>
+                    Accede a tu cuenta
+                </div>
+                <h1 class="text-4xl font-bold text-colombia-blue">
+                    Gestiona tus proyectos y monitorea tu energía solar con SIESE
+                </h1>
+                <p class="text-lg text-gray-600">
+                    Inicia sesión para continuar con tus simulaciones, visualizar métricas en tiempo real y seguir las novedades del sector energético colombiano.
+                </p>
+                <ul class="space-y-4 text-gray-600">
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 mt-1 mr-3 inline-flex items-center justify-center h-10 w-10 rounded-full bg-solar-yellow bg-opacity-20 text-solar-orange">
+                            <i class="fas fa-chart-line"></i>
+                        </span>
+                        <div>
+                            <h3 class="text-lg font-semibold text-colombia-blue">Dashboard de monitoreo</h3>
+                            <p class="text-sm">Revisa tu producción energética, ahorro generado y métricas clave.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 mt-1 mr-3 inline-flex items-center justify-center h-10 w-10 rounded-full bg-earth-green bg-opacity-20 text-earth-green">
+                            <i class="fas fa-bolt"></i>
+                        </span>
+                        <div>
+                            <h3 class="text-lg font-semibold text-colombia-blue">Simulaciones guardadas</h3>
+                            <p class="text-sm">Retoma tus escenarios y optimiza la planeación de tus proyectos solares.</p>
+                        </div>
+                    </li>
+                </ul>
+                <div class="text-gray-500 text-sm">
+                    <i class="fas fa-shield-alt text-solar-yellow mr-2"></i>
+                    Protegemos tus credenciales con estándares de seguridad modernos y cifrado robusto.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 p-8 lg:p-10">
+                <h2 class="text-2xl font-bold text-colombia-blue mb-6">Ingresar a SIESE</h2>
+                <p class="text-sm text-gray-500 mb-8">Introduce tus credenciales para acceder. ¿Aún no tienes cuenta? <a href="{% url 'account_signup' %}" class="font-semibold text-colombia-blue hover:text-solar-orange">Regístrate aquí</a>.</p>
+
+                <form method="post" action="{% url 'account_login' %}" novalidate>
+                    {% csrf_token %}
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+
+                    {% if form.non_field_errors %}
+                    <div class="mb-4 rounded-lg border border-red-300 bg-red-50 text-red-700 px-4 py-3">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="space-y-5">
+                        {% for field in form.visible_fields %}
+                            {% if field.name == 'remember' %}
+                                <div class="flex items-center justify-between">
+                                    <label class="inline-flex items-center text-sm text-gray-600">
+                                        {{ field }}
+                                        <span class="ml-2">Recordarme en este equipo</span>
+                                    </label>
+                                    <a href="{% url 'accounts:password_reset_request' %}" class="text-sm font-semibold text-colombia-blue hover:text-solar-orange">
+                                        ¿Olvidaste tu contraseña?
+                                    </a>
+                                </div>
+                                {% if field.errors %}
+                                <ul class="mt-2 text-sm text-red-600">
+                                    {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            {% else %}
+                                <div>
+                                    <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        {{ field.label }}
+                                        {% if field.field.required %}
+                                            <span class="text-solar-orange">*</span>
+                                        {% endif %}
+                                    </label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                        <p class="mt-2 text-xs text-gray-400">{{ field.help_text }}</p>
+                                    {% endif %}
+                                    {% if field.errors %}
+                                        <ul class="mt-2 text-sm text-red-600">
+                                            {% for error in field.errors %}
+                                            <li>{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" class="w-full mt-8 inline-flex items-center justify-center bg-colombia-blue text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-800 transition">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Iniciar sesión
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center text-sm text-gray-500">
+                    ¿Necesitas ayuda?
+                    <a href="mailto:info@siese.co" class="font-semibold text-colombia-blue hover:text-solar-orange">Contáctanos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

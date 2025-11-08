@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block meta_description %}{{ meta_description }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .fade-in { animation: fadeIn 0.8s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .descripcion-contenido h1, .descripcion-contenido h2, .descripcion-contenido h3, .descripcion-contenido h4 {
+        color: #003A70;
+        margin-top: 1.25rem;
+        margin-bottom: 0.75rem;
+        font-weight: 700;
+    }
+    .descripcion-contenido p { margin-bottom: 0.75rem; line-height: 1.7; }
+    .descripcion-contenido ul, .descripcion-contenido ol { margin-left: 1.25rem; margin-bottom: 1rem; }
+    .descripcion-contenido li { margin-bottom: 0.25rem; }
+    .descripcion-contenido a { color: #1d4ed8; text-decoration: underline; }
+    .descripcion-contenido table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    .descripcion-contenido th, .descripcion-contenido td { border: 1px solid #e5e7eb; padding: 0.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 fade-in">
+    <nav class="text-sm breadcrumbs mb-6">
+        <ul class="flex space-x-2 text-gray-600">
+            <li><a href="{% url 'core:home' %}" class="hover:text-colombia-blue">Inicio</a></li>
+            <li><span class="mx-2">/</span></li>
+            <li><a href="{% url 'regulatory:home' %}" class="hover:text-colombia-blue">Marco Regulatorio</a></li>
+            <li><span class="mx-2">/</span></li>
+            <li class="text-colombia-blue font-medium">{{ framework.get_document_type_display }} {{ framework.document_number }} de {{ framework.year }}</li>
+        </ul>
+    </nav>
+
+    <header class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-colombia-blue mb-4">
+            {{ framework.title }}
+        </h1>
+        <div class="flex justify-center items-center space-x-6 text-lg text-gray-600 mb-6">
+            <span class="bg-solar-yellow px-4 py-2 rounded-full text-colombia-blue font-semibold">
+                {{ framework.get_document_type_display }} {{ framework.document_number }}
+            </span>
+            <span class="bg-earth-green px-4 py-2 rounded-full text-white font-semibold">
+                Año {{ framework.year }}
+            </span>
+        </div>
+        {% if framework.issuing_entity %}
+        <p class="text-sm text-gray-500">Entidad emisora: <span class="font-semibold text-gray-700">{{ framework.issuing_entity }}</span></p>
+        {% endif %}
+
+    </header>
+
+    <div class="max-w-6xl mx-auto">
+        <section class="mb-10">
+            <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
+                <h3 class="text-xl font-semibold text-colombia-blue mb-3">
+                    <i class="fas fa-info-circle mr-2"></i>Estado de actualización
+                </h3>
+                {% if framework.last_scraped %}
+                    <p class="text-gray-700 mb-2">
+                        <i class="fas fa-clock mr-2"></i>
+                        Última actualización: <strong>{{ framework.last_scraped|date:"d/m/Y H:i" }}</strong>
+                    </p>
+                {% else %}
+                    <p class="text-gray-700 mb-2">
+                        <i class="fas fa-clock mr-2"></i>
+                        Aún no actualizado desde la fuente oficial
+                    </p>
+                {% endif %}
+
+                <p class="text-gray-600">
+                    <i class="fas fa-link mr-2"></i>
+                    <a href="{{ framework.official_url }}" target="_blank" class="text-colombia-blue hover:text-solar-orange">Ver fuente oficial</a>
+                </p>
+
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <div class="bg-white rounded-xl p-8 shadow-lg border-l-4 border-earth-green">
+                <h2 class="text-3xl font-bold text-colombia-blue mb-6 flex items-center">
+                    <i class="fas fa-bullseye mr-3 text-earth-green"></i>
+                    Objetivo Principal
+                </h2>
+                <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                    {{ framework.main_objective|linebreaks }}
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-4">
+            <h2 class="text-3xl font-bold text-colombia-blue mb-6 flex items-center">
+                <i class="fas fa-star mr-3 text-solar-yellow"></i>
+                Beneficios de la Ley
+            </h2>
+        </section>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+            <section class="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-8 shadow-lg border-l-4 border-earth-green">
+                <h3 class="text-2xl font-bold text-colombia-blue mb-6 flex items-center">
+                    <i class="fas fa-building mr-3 text-earth-green"></i>
+                    Para Empresas
+                </h3>
+                <div class="prose max-w-none">
+                    {{ framework.benefits_companies|linebreaks }}
+                </div>
+            </section>
+
+            <section class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-8 shadow-lg border-l-4 border-solar-orange">
+                <h3 class="text-2xl font-bold text-colombia-blue mb-6 flex items-center">
+                    <i class="fas fa-users mr-3 text-solar-orange"></i>
+                    Para Ciudadanos
+                </h3>
+                <div class="prose max-w-none">
+                    {{ framework.benefits_citizens|linebreaks }}
+                </div>
+            </section>
+        </div>
+
+        <section class="mb-12">
+            <div class="bg-gradient-to-r from-blue-50 to-yellow-50 rounded-xl p-8 shadow-lg">
+                <h2 class="text-3xl font-bold text-colombia-blue mb-6 flex items-center">
+                    <i class="fas fa-file-alt mr-3 text-solar-yellow"></i>
+                    Resumen Ejecutivo
+                </h2>
+                <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                    {{ framework.summary|linebreaks }}
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <div class="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
+                <h2 class="text-3xl font-bold text-colombia-blue mb-6 flex items-center">
+                    <i class="fas fa-file-contract mr-3 text-colombia-blue"></i>
+                    Texto oficial extraído (scrapeado)
+                </h2>
+                <div class="prose max-w-none text-gray-800 leading-relaxed descripcion-contenido">
+                    {% if framework.content_scraped and framework.content_scraped|length > 0 %}
+                        {{ framework.content_scraped|safe }}
+                    {% else %}
+                        <p class="text-gray-600 italic">No se ha podido recuperar el texto oficial. Consulta la fuente para conocer el contenido completo.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-xl p-8 shadow-lg border border-colombia-blue mb-12">
+            <h2 class="text-3xl font-bold text-colombia-blue mb-6 flex items-center">
+                <i class="fas fa-certificate mr-3 text-solar-yellow"></i>
+                Fuente Oficial
+            </h2>
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <p class="text-gray-700 mb-4">
+                    Esta información proviene de fuentes oficiales del Gobierno de Colombia. Para consultar el documento completo y actualizaciones, visita el siguiente enlace:
+                </p>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-3 sm:space-y-0">
+                    <a href="{{ framework.official_url }}" target="_blank"
+                       class="inline-flex items-center bg-colombia-blue text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-external-link-alt mr-2"></i>
+                        Ver Fuente Oficial
+                    </a>
+                    {% if pdf_url %}
+                    <a href="{{ pdf_url }}" target="_blank"
+                       class="inline-flex items-center bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors">
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        Descargar PDF oficial
+                    </a>
+                    {% endif %}
+                </div>
+                {% if framework.last_scraped %}
+                <p class="text-sm text-gray-500 mt-4">
+                    <i class="fas fa-clock mr-1"></i>
+                    Última actualización: {{ framework.last_scraped|date:"d/m/Y H:i" }}
+                </p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+
+{% if show_update_button %}
+<div id="updateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg max-w-md mx-4">
+        <div id="modalContent">
+            <div class="text-center">
+                <i class="fas fa-sync-alt fa-3x text-colombia-blue mb-4 animate-spin"></i>
+                <h3 class="text-xl font-bold mb-2">Actualizando información...</h3>
+                <p class="text-gray-600">Obteniendo datos desde fuentes oficiales</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}
