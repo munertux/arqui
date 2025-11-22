@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificado - {{ certificate.course.title }}</title>
+    <style>
+        @page { size: A4; margin: 18mm; }
+        * { box-sizing: border-box; }
+        html, body { width:100%; margin:0; padding:0; }
+        body { font-family: Helvetica, Arial, sans-serif; color:#222; line-height:1.42; background:#f8f8f6; }
+
+        /* Contenedor principal centrado y con ancho seguro dentro del área imprimible (170mm) */
+        .certificate-container {
+            max-width: 170mm;       /* siempre cabe dentro del área útil */
+            margin: 0 auto;
+            border: 4px solid #FFD700;
+            padding: 14mm 12mm 12mm;
+            position: relative;
+            background: #fff;
+        }
+        /* Wrapper interno sin limitar demasiado el ancho para evitar cortes */
+        .content-wrapper { max-width: 150mm; margin: 0 auto; text-align: center; }
+
+        /* Esquinas decorativas */
+        .corner { position:absolute; width:40px; height:40px; border-color:#003A70; opacity:.22; }
+        .corner-tl { top:0; left:0; border-top:3px solid; border-left:3px solid; }
+        .corner-tr { top:0; right:0; border-top:3px solid; border-right:3px solid; }
+        .corner-bl { bottom:0; left:0; border-bottom:3px solid; border-left:3px solid; }
+        .corner-br { bottom:0; right:0; border-bottom:3px solid; border-right:3px solid; }
+
+        h1.title { font-size:26px; text-align:center; font-weight:700; color:#003A70; margin:0 0 10mm; letter-spacing:.25px; text-transform: uppercase; }
+        .logo { text-align:center; margin-bottom:8mm; }
+        .logo-text { font-size:22px; font-weight:700; color:#003A70; }
+        .logo-subtitle { font-size:11px; color:#555; }
+
+        .block { text-align:center; margin-bottom:9mm; }
+        .label { font-size:14px; color:#555; margin:0 0 4mm; }
+        .user-name { font-size:22px; font-weight:700; color:#003A70; margin:2mm 0 5mm; word-break: break-word; }
+        .user-email { font-size:12px; color:#666; margin:0 0 .8rem; word-break: break-all; }
+
+        .course-box { border-top:1px solid #bbb; border-bottom:1px solid #bbb; padding:7mm 2mm; margin:9mm 0 11mm; }
+        .course-label { font-size:13px; color:#555; margin:0 0 4mm; }
+        .course-title { font-size:18px; font-weight:700; color:#228B22; margin:0; line-height:1.35; word-break: break-word; }
+
+        .stats { display:flex; justify-content:center; gap:14mm; margin:0 0 9mm; flex-wrap:wrap; }
+        .stat-box { min-width:60mm; text-align:center; }
+        .stat-label { font-size:12px; color:#555; margin-bottom:2mm; }
+        .stat-value { font-size:20px; font-weight:700; color:#FF8C00; }
+        .date-value { font-size:16px; font-weight:600; color:#222; }
+
+        .verification-box { background:#f2f2f2; padding:6mm 5mm 5mm; border-radius:8px; text-align:center; margin-top:4mm; }
+        .verification-label { font-size:12px; color:#555; margin:0 0 3mm; }
+        .verification-code { font-size:15px; font-family:Courier, monospace; font-weight:700; color:#003A70; letter-spacing:1.2px; margin:2mm 0 3mm; word-break: break-word; }
+        .verification-url { font-size:10px; color:#666; line-height:1.35; word-break: break-all; }
+
+        .footer { text-align:center; margin-top:11mm; border-top:1px solid #ccc; padding-top:5mm; }
+        .footer-text { font-size:10px; font-style:italic; color:#666; line-height:1.35; }
+
+        /* Evitar saltos inesperados y cortes de palabras largas */
+        p, h1 { orphans:3; widows:3; }
+        p, div, span { overflow-wrap: break-word; word-break: break-word; hyphens: auto; }
+        .content-wrapper * { max-width:100%; }
+    </style>
+</head>
+<body>
+    <div class="certificate-container">
+        <div class="corner corner-tl"></div>
+        <div class="corner corner-tr"></div>
+        <div class="corner corner-bl"></div>
+        <div class="corner corner-br"></div>
+        <div class="content-wrapper">
+            <div class="logo">
+                <div class="logo-text">SIESE</div>
+                <div class="logo-subtitle">Sistema Integral de Energía Solar en Colombia</div>
+            </div>
+            <h1 class="title">Certificado de Aprovechamiento</h1>
+            <div class="block">
+                <p class="label">El presente documento certifica que:</p>
+                <p class="user-name">{{ certificate.user.full_name }}</p>
+                <p class="user-email">{{ certificate.user.email }}</p>
+            </div>
+            <div class="course-box">
+                <p class="course-label">Ha aprobado satisfactoriamente el curso:</p>
+                <p class="course-title">{{ certificate.course.title }}</p>
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-label">Puntaje final</div>
+                    <div class="stat-value">{{ certificate.final_score }}%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Fecha de emisión</div>
+                    <div class="date-value">{{ certificate.issued_at|date:'d/m/Y' }}</div>
+                </div>
+            </div>
+            <div class="verification-box">
+                <p class="verification-label">Código de verificación</p>
+                <p class="verification-code">{{ certificate.certificate_code }}</p>
+                <p class="verification-url">Verifica en: siese.edu.co/verificar/{{ certificate.certificate_code }}</p>
+            </div>
+            <div class="footer">
+                <p class="footer-text">Este certificado es válido y puede ser verificado públicamente.<br>Emitido por SIESE - Sistema Integral de Energía Solar en Colombia</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

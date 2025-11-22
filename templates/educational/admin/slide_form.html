@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ action }} Slide - SIESE{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumb -->
+        <nav class="mb-6 text-sm">
+            <ol class="flex items-center space-x-2 text-gray-600">
+                <li><a href="{% url 'educational:admin_course_list' %}" class="hover:text-colombia-blue">Cursos</a></li>
+                <li><i class="fas fa-chevron-right text-xs"></i></li>
+                <li><a href="{% url 'educational:admin_course_detail' course.pk %}" class="hover:text-colombia-blue">{{ course.title }}</a></li>
+                <li><i class="fas fa-chevron-right text-xs"></i></li>
+                <li class="text-gray-600">{{ module.title }}</li>
+                <li><i class="fas fa-chevron-right text-xs"></i></li>
+                <li class="text-colombia-blue font-medium">{{ action }} Slide</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                        <i class="fas fa-file-powerpoint text-colombia-blue mr-2"></i>
+                        {{ action }} Slide
+                    </h1>
+                    <p class="text-gray-600">
+                        Módulo: <span class="font-medium">{{ module.title }}</span> 
+                        <span class="text-gray-400 mx-2">•</span>
+                        Curso: <span class="font-medium">{{ course.title }}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <form method="post" enctype="multipart/form-data" class="p-6">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <!-- Información Básica -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                        <i class="fas fa-info-circle text-colombia-blue mr-2"></i>
+                        Información Básica
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <!-- Orden -->
+                        <div>
+                            <label for="id_order" class="block text-sm font-medium text-gray-700 mb-2">
+                                Orden *
+                            </label>
+                            {{ form.order }}
+                            {% if form.order.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.order.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Tipo de contenido -->
+                        <div class="md:col-span-2">
+                            <label for="id_content_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                Tipo de Contenido *
+                            </label>
+                            {{ form.content_type }}
+                            {% if form.content_type.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.content_type.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Título -->
+                        <div>
+                            <label for="id_title" class="block text-sm font-medium text-gray-700 mb-2">
+                                Título de la Slide *
+                            </label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Subtítulo -->
+                        <div>
+                            <label for="id_subtitle" class="block text-sm font-medium text-gray-700 mb-2">
+                                Subtítulo
+                            </label>
+                            {{ form.subtitle }}
+                            {% if form.subtitle.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.subtitle.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenido Principal -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                        <i class="fas fa-align-left text-colombia-blue mr-2"></i>
+                        Contenido
+                    </h3>
+                    
+                    <div class="mb-4">
+                        <label for="id_content" class="block text-sm font-medium text-gray-700 mb-2">
+                            Contenido de la Slide *
+                        </label>
+                        {{ form.content }}
+                        {% if form.content.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.content.errors.0 }}</p>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+
+                <!-- Configuración Adicional -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                        <i class="fas fa-cog text-colombia-blue mr-2"></i>
+                        Configuración Adicional
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <!-- Duración -->
+                        <div>
+                            <label for="id_duration_minutes" class="block text-sm font-medium text-gray-700 mb-2">
+                                Duración Estimada (minutos)
+                            </label>
+                            {{ form.duration_minutes }}
+                            {% if form.duration_minutes.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.duration_minutes.errors.0 }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500">Tiempo estimado para esta slide.</p>
+                        </div>
+                    </div>
+
+                    <!-- Recursos Adicionales -->
+                    <div>
+                        <label for="id_additional_resources" class="block text-sm font-medium text-gray-700 mb-2">
+                            Recursos Adicionales
+                        </label>
+                        {{ form.additional_resources }}
+                        {% if form.additional_resources.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.additional_resources.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-sm text-gray-500">
+                            Enlaces, documentos o materiales complementarios (uno por línea).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Estado (solo en edición) -->
+                {% if action == 'Editar' %}
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                        <i class="fas fa-toggle-on text-colombia-blue mr-2"></i>
+                        Estado
+                    </h3>
+                    
+                    <div class="flex items-center">
+                        {{ form.is_active }}
+                        <label for="id_is_active" class="ml-2 text-sm text-gray-700">
+                            Slide activa y visible para estudiantes
+                        </label>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Botones -->
+                <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                    <a href="{% url 'educational:admin_course_detail' course.pk %}" 
+                       class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-2.5 bg-colombia-blue text-white rounded-lg hover:bg-blue-800 transition-colors shadow-sm">
+                        <i class="fas fa-save mr-2"></i>
+                        {{ action }} Slide
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Ayuda -->
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 class="text-sm font-semibold text-blue-900 mb-2">
+                <i class="fas fa-info-circle mr-2"></i>
+                Tipos de Contenido Disponibles
+            </h4>
+            <ul class="text-sm text-blue-800 space-y-1">
+                <li><i class="fas fa-check-circle text-blue-600 mr-2"></i><strong>text:</strong> Contenido de texto con HTML</li>
+                <li><i class="fas fa-check-circle text-blue-600 mr-2"></i><strong>video:</strong> Video embebido (YouTube/Vimeo)</li>
+                <li><i class="fas fa-check-circle text-blue-600 mr-2"></i><strong>image:</strong> Slide centrada en imagen</li>
+                <li><i class="fas fa-check-circle text-blue-600 mr-2"></i><strong>quiz:</strong> Slide interactiva con preguntas</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    input[type="url"],
+    input[type="number"],
+    input[type="file"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 0.625rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+    
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: none;
+        border-color: #003A70;
+        box-shadow: 0 0 0 3px rgba(0, 58, 112, 0.1);
+    }
+    
+    textarea {
+        min-height: 150px;
+        resize: vertical;
+        font-family: monospace;
+    }
+    
+    #id_content {
+        min-height: 250px;
+        font-family: 'Courier New', monospace;
+    }
+    
+    input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 0.25rem;
+        border: 1px solid #d1d5db;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

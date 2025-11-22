@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ course.title }} - Administración - SIESE{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-6">
+            <a href="{% url 'educational:admin_course_list' %}" class="text-colombia-blue hover:text-blue-800 mb-4 inline-block">
+                <i class="fas fa-arrow-left mr-2"></i>Volver a la lista
+            </a>
+        </div>
+
+        <!-- Información del Curso -->
+        <div class="bg-white rounded-lg shadow-md mb-6">
+            <div class="md:flex">
+                <!-- Imagen -->
+                <div class="md:w-80 h-64 bg-gradient-to-br from-colombia-blue to-blue-800 flex items-center justify-center">
+                    {% if course.image %}
+                    <img src="{{ course.image.url }}" alt="{{ course.title }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <i class="fas fa-graduation-cap text-8xl text-white opacity-50"></i>
+                    {% endif %}
+                </div>
+                
+                <!-- Contenido -->
+                <div class="flex-1 p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ course.title }}</h1>
+                            <div class="flex gap-2 mb-3">
+                                {% if course.publish_state == 'published' %}
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                    <i class="fas fa-check-circle mr-1"></i>Publicado
+                                </span>
+                                {% else %}
+                                <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                    <i class="fas fa-edit mr-1"></i>Borrador
+                                </span>
+                                {% endif %}
+                                
+                                {% if not course.is_active %}
+                                <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                    <i class="fas fa-ban mr-1"></i>Inactivo
+                                </span>
+                                {% endif %}
+                                
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                    <i class="fas fa-signal mr-1"></i>{{ course.get_level_display }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <a href="{% url 'educational:admin_course_update' course.pk %}" 
+                               class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">
+                                <i class="fas fa-edit mr-1"></i>Editar Curso
+                            </a>
+                            <a href="{% url 'educational:admin_course_delete' course.pk %}" 
+                               class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors">
+                                <i class="fas fa-trash mr-1"></i>Eliminar
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-4">{{ course.description }}</p>
+                    
+                    <!-- Metadatos -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div class="bg-gray-50 p-3 rounded">
+                            <p class="text-gray-500">Módulos</p>
+                            <p class="text-xl font-bold text-colombia-blue">{{ modules.count }}</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded">
+                            <p class="text-gray-500">Slides</p>
+                            <p class="text-xl font-bold text-colombia-blue">{{ total_slides }}</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded">
+                            <p class="text-gray-500">Preguntas Quiz</p>
+                            <p class="text-xl font-bold text-colombia-blue">{{ total_questions }}</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded">
+                            <p class="text-gray-500">Horas Estimadas</p>
+                            <p class="text-xl font-bold text-colombia-blue">{{ course.estimated_hours }}h</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Módulos del Curso -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">
+                    <i class="fas fa-list mr-2 text-colombia-blue"></i>
+                    Módulos y Contenido
+                </h2>
+                <a href="{% url 'educational:admin_module_create' course.pk %}" 
+                   class="bg-solar-yellow text-colombia-blue px-4 py-2 rounded hover:bg-yellow-400 transition-colors font-semibold">
+                    <i class="fas fa-plus mr-2"></i>Agregar Módulo
+                </a>
+            </div>
+            
+            {% if modules %}
+            <div class="space-y-4">
+                {% for module in modules %}
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <!-- Header del módulo -->
+                    <div class="bg-gray-50 p-4 flex justify-between items-center cursor-pointer hover:bg-gray-100 transition-colors"
+                         onclick="toggleModule({{ module.id }})">
+                        <div class="flex items-center gap-4">
+                            <span class="bg-colombia-blue text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">
+                                {{ module.order }}
+                            </span>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">{{ module.title }}</h3>
+                                <p class="text-sm text-gray-600">
+                                    {{ module.slides.count }} slides • {{ module.questions.count }} preguntas
+                                    {% if module.required_pass_score %}
+                                    • {{ module.required_pass_score }}% para aprobar
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'educational:admin_module_update' module.pk %}" 
+                               class="text-blue-600 hover:text-blue-800 px-3 py-1"
+                               onclick="event.stopPropagation();">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'educational:admin_module_delete' module.pk %}" 
+                               class="text-red-600 hover:text-red-800 px-3 py-1"
+                               onclick="event.stopPropagation();">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                            <i class="fas fa-chevron-down transition-transform" id="chevron-{{ module.id }}"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenido del módulo (slides) -->
+                    <div id="module-{{ module.id }}" class="hidden bg-white">
+                        <div class="p-4 border-t border-gray-200">
+                            <!-- Lista de slides -->
+                            {% if module.slides.all %}
+                            <h4 class="font-semibold text-gray-700 mb-3">
+                                <i class="fas fa-file-alt mr-2"></i>Diapositivas:
+                            </h4>
+                            <div class="space-y-2 mb-4">
+                                {% for slide in module.slides.all %}
+                                <div class="flex justify-between items-center p-3 bg-gray-50 rounded hover:bg-gray-100">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-sm text-gray-500 font-mono">{{ slide.order }}</span>
+                                        <div>
+                                            <p class="font-medium text-gray-800">{{ slide.title }}</p>
+                                            {% if slide.subtitle %}
+                                            <p class="text-sm text-gray-600">{{ slide.subtitle }}</p>
+                                            {% endif %}
+                                            <div class="flex gap-2 mt-1">
+                                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                                    {{ slide.get_content_type_display }}
+                                                </span>
+                                                {% if slide.duration_minutes %}
+                                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                                                    <i class="fas fa-clock mr-1"></i>{{ slide.duration_minutes }} min
+                                                </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <a href="{% url 'educational:admin_slide_update' slide.pk %}" 
+                                           class="text-green-600 hover:text-green-800 px-2 py-1"
+                                           title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'educational:admin_slide_delete' slide.pk %}" 
+                                           class="text-red-600 hover:text-red-800 px-2 py-1"
+                                           title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-gray-500 italic mb-4">No hay slides en este módulo</p>
+                            {% endif %}
+                            
+                            <a href="{% url 'educational:admin_slide_create' module.pk %}" 
+                               class="inline-block text-sm bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600">
+                                <i class="fas fa-plus mr-1"></i>Agregar Slide
+                            </a>
+                        </div>
+                        
+                        <!-- Preguntas del quiz -->
+                        {% if module.questions.all %}
+                        <div class="p-4 border-t border-gray-200 bg-yellow-50">
+                            <h4 class="font-semibold text-gray-700 mb-3">
+                                <i class="fas fa-question-circle mr-2"></i>Preguntas del Quiz:
+                            </h4>
+                            <div class="space-y-2">
+                                {% for question in module.questions.all %}
+                                <div class="flex justify-between items-start p-3 bg-white rounded">
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-800">{{ question.text|truncatewords:15 }}</p>
+                                        <p class="text-xs text-gray-600 mt-1">
+                                            {{ question.get_question_type_display }} • {{ question.options.count }} opciones
+                                        </p>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <a href="{% url 'educational:admin_quiz_question_update' question.pk %}" 
+                                           class="text-green-600 hover:text-green-800 px-2 py-1"
+                                           title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'educational:admin_quiz_question_delete' question.pk %}" 
+                                           class="text-red-600 hover:text-red-800 px-2 py-1"
+                                           title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <a href="{% url 'educational:admin_quiz_question_create' module.pk %}" 
+                               class="inline-block mt-3 text-sm bg-yellow-600 text-white px-3 py-2 rounded hover:bg-yellow-700">
+                                <i class="fas fa-plus mr-1"></i>Agregar Pregunta
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="p-4 border-t border-gray-200 bg-yellow-50">
+                            <p class="text-gray-600 mb-3">
+                                <i class="fas fa-question-circle mr-2"></i>Este módulo no tiene preguntas de quiz
+                            </p>
+                            <a href="{% url 'educational:admin_quiz_question_create' module.pk %}" 
+                               class="inline-block text-sm bg-yellow-600 text-white px-3 py-2 rounded hover:bg-yellow-700">
+                                <i class="fas fa-plus mr-1"></i>Agregar Primera Pregunta
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-folder-open text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-600 mb-4">Este curso no tiene módulos aún</p>
+                <a href="{% url 'educational:admin_module_create' course.pk %}" 
+                   class="inline-block bg-solar-yellow text-colombia-blue px-6 py-3 rounded-lg hover:bg-yellow-400 transition-colors font-semibold">
+                    <i class="fas fa-plus mr-2"></i>Crear Primer Módulo
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Examen Final -->
+        <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">
+                    <i class="fas fa-trophy mr-2 text-solar-orange"></i>
+                    Examen Final
+                </h2>
+                <a href="{% url 'educational:admin_final_question_create' course.pk %}" 
+                   class="bg-solar-orange text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors font-semibold">
+                    <i class="fas fa-plus mr-2"></i>Agregar Pregunta
+                </a>
+            </div>
+
+            <div class="bg-orange-50 border-l-4 border-solar-orange p-4 mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-info-circle text-solar-orange text-xl mr-3"></i>
+                    <div>
+                        <p class="font-semibold text-gray-800">Configuración del Examen Final</p>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Puntaje mínimo: <strong>{{ course.final_pass_score }}%</strong> • 
+                            Intentos permitidos: <strong>{{ course.max_final_attempts|default:"Ilimitados" }}</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {% if course.final_questions.all %}
+            <div class="space-y-3">
+                {% for question in course.final_questions.all %}
+                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="bg-orange-100 text-orange-800 text-xs font-semibold px-2 py-1 rounded">
+                                    {{ question.get_question_type_display }}
+                                </span>
+                                {% if not question.is_active %}
+                                <span class="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded">
+                                    Inactiva
+                                </span>
+                                {% endif %}
+                            </div>
+                            <p class="font-medium text-gray-800 mb-2">{{ question.text }}</p>
+                            <div class="text-sm text-gray-600">
+                                <i class="fas fa-list mr-1"></i>
+                                {{ question.final_options.count }} opciones
+                            </div>
+                            {% if question.explanation %}
+                            <p class="text-sm text-gray-500 mt-2 italic">
+                                <i class="fas fa-comment mr-1"></i>{{ question.explanation|truncatewords:20 }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="flex gap-2 ml-4">
+                            <a href="{% url 'educational:admin_final_question_update' question.pk %}" 
+                               class="text-green-600 hover:text-green-800 px-3 py-1"
+                               title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'educational:admin_final_question_delete' question.pk %}" 
+                               class="text-red-600 hover:text-red-800 px-3 py-1"
+                               title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12 bg-gray-50 rounded-lg">
+                <i class="fas fa-question-circle text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-600 mb-4">Este curso no tiene preguntas de examen final</p>
+                <a href="{% url 'educational:admin_final_question_create' course.pk %}" 
+                   class="inline-block bg-solar-orange text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors font-semibold">
+                    <i class="fas fa-plus mr-2"></i>Crear Primera Pregunta
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleModule(moduleId) {
+        const content = document.getElementById(`module-${moduleId}`);
+        const chevron = document.getElementById(`chevron-${moduleId}`);
+        
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            chevron.classList.add('rotate-180');
+        } else {
+            content.classList.add('hidden');
+            chevron.classList.remove('rotate-180');
+        }
+    }
+</script>
+{% endblock %}

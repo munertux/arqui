@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ action }} Módulo - SIESE{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumb -->
+        <nav class="mb-6 text-sm">
+            <ol class="flex items-center space-x-2 text-gray-600">
+                <li><a href="{% url 'educational:admin_course_list' %}" class="hover:text-colombia-blue">Cursos</a></li>
+                <li><i class="fas fa-chevron-right text-xs"></i></li>
+                <li><a href="{% url 'educational:admin_course_detail' course.pk %}" class="hover:text-colombia-blue">{{ course.title }}</a></li>
+                <li><i class="fas fa-chevron-right text-xs"></i></li>
+                <li class="text-colombia-blue font-medium">{{ action }} Módulo</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                        <i class="fas fa-book text-colombia-blue mr-2"></i>
+                        {{ action }} Módulo
+                    </h1>
+                    <p class="text-gray-600">Curso: <span class="font-medium">{{ course.title }}</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <form method="post" class="p-6">
+                {% csrf_token %}
+                
+                <!-- Mensajes de error generales -->
+                {% if form.non_field_errors %}
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <!-- Información Básica -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                        <i class="fas fa-info-circle text-colombia-blue mr-2"></i>
+                        Información Básica
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <!-- Título -->
+                        <div>
+                            <label for="id_title" class="block text-sm font-medium text-gray-700 mb-2">
+                                Título del Módulo *
+                            </label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Orden -->
+                        <div>
+                            <label for="id_order" class="block text-sm font-medium text-gray-700 mb-2">
+                                Orden en el Curso *
+                                <span class="text-gray-500 font-normal">(1, 2, 3...)</span>
+                            </label>
+                            {{ form.order }}
+                            {% if form.order.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.order.errors.0 }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500">Define la posición del módulo en el curso.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                        <i class="fas fa-align-left text-colombia-blue mr-2"></i>
+                        Descripción
+                    </h3>
+                    
+                    <div>
+                        <label for="id_summary" class="block text-sm font-medium text-gray-700 mb-2">
+                            Resumen del Módulo
+                        </label>
+                        {{ form.summary }}
+                        {% if form.summary.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.summary.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-sm text-gray-500">Breve descripción de lo que aprenderán en este módulo.</p>
+                    </div>
+                </div>
+
+                <!-- Configuración de Quiz -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                        <i class="fas fa-cog text-colombia-blue mr-2"></i>
+                        Configuración del Quiz
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Puntaje requerido -->
+                        <div>
+                            <label for="id_required_pass_score" class="block text-sm font-medium text-gray-700 mb-2">
+                                Puntaje para Aprobar (%)
+                            </label>
+                            {{ form.required_pass_score }}
+                            {% if form.required_pass_score.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.required_pass_score.errors.0 }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500">Porcentaje mínimo para aprobar el quiz.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado (solo en edición) -->
+                {% if action == 'Editar' %}
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                        <i class="fas fa-toggle-on text-colombia-blue mr-2"></i>
+                        Estado
+                    </h3>
+                    
+                    <div class="flex items-center">
+                        {{ form.is_active }}
+                        <label for="id_is_active" class="ml-2 text-sm text-gray-700">
+                            Módulo activo y visible para estudiantes
+                        </label>
+                    </div>
+                    {% if form.is_active.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.is_active.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Botones -->
+                <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                    <a href="{% url 'educational:admin_course_detail' course.pk %}" 
+                       class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-2.5 bg-colombia-blue text-white rounded-lg hover:bg-blue-800 transition-colors shadow-sm">
+                        <i class="fas fa-save mr-2"></i>
+                        {{ action }} Módulo
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Ayuda -->
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 class="text-sm font-semibold text-blue-900 mb-2">
+                <i class="fas fa-info-circle mr-2"></i>
+                Consejos
+            </h4>
+            <ul class="text-sm text-blue-800 space-y-1">
+                <li><i class="fas fa-check-circle text-blue-600 mr-2"></i>Ordena los módulos lógicamente (1, 2, 3...)</li>
+                <li><i class="fas fa-check-circle text-blue-600 mr-2"></i>Escribe un resumen claro de los objetivos del módulo</li>
+                <li><i class="fas fa-check-circle text-blue-600 mr-2"></i>Define un puntaje de aprobación apropiado (70% por defecto)</li>
+                <li><i class="fas fa-check-circle text-blue-600 mr-2"></i>Después de crear el módulo, agrega slides y preguntas de quiz</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos para campos de formulario */
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 0.625rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+    
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    textarea:focus,
+    select:focus {
+        outline: none;
+        border-color: #003A70;
+        box-shadow: 0 0 0 3px rgba(0, 58, 112, 0.1);
+    }
+    
+    textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 0.25rem;
+        border: 1px solid #d1d5db;
+        cursor: pointer;
+    }
+    
+    input[type="checkbox"]:checked {
+        background-color: #003A70;
+        border-color: #003A70;
+    }
+</style>
+{% endblock %}

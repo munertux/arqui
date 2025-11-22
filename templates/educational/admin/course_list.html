@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Administrar Cursos - SIESE{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-colombia-blue">
+                        <i class="fas fa-graduation-cap mr-2"></i>
+                        Administración de Cursos
+                    </h1>
+                    <p class="text-gray-600 mt-2">Gestiona el contenido educativo de la plataforma</p>
+                </div>
+                <a href="{% url 'educational:admin_course_create' %}" 
+                   class="bg-solar-yellow text-colombia-blue px-6 py-3 rounded-lg hover:bg-yellow-400 transition-colors font-semibold shadow-md">
+                    <i class="fas fa-plus mr-2"></i>Crear Nuevo Curso
+                </a>
+            </div>
+            
+            <!-- Estadísticas -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Total de Cursos</p>
+                            <p class="text-2xl font-bold text-colombia-blue">{{ total_courses }}</p>
+                        </div>
+                        <i class="fas fa-book text-4xl text-blue-300"></i>
+                    </div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Publicados</p>
+                            <p class="text-2xl font-bold text-green-600">{{ published_courses }}</p>
+                        </div>
+                        <i class="fas fa-check-circle text-4xl text-green-300"></i>
+                    </div>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Borradores</p>
+                            <p class="text-2xl font-bold text-yellow-600">{{ draft_courses }}</p>
+                        </div>
+                        <i class="fas fa-edit text-4xl text-yellow-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de cursos -->
+        {% if courses %}
+        <div class="grid gap-6">
+            {% for course in courses %}
+            <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden">
+                <div class="md:flex">
+                    <!-- Imagen del curso -->
+                    <div class="md:w-64 h-48 bg-gradient-to-br from-colombia-blue to-blue-800 flex items-center justify-center">
+                        {% if course.image %}
+                        <img src="{{ course.image.url }}" alt="{{ course.title }}" class="w-full h-full object-cover">
+                        {% else %}
+                        <i class="fas fa-graduation-cap text-6xl text-white opacity-50"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Contenido -->
+                    <div class="flex-1 p-6">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h2 class="text-2xl font-bold text-gray-800">{{ course.title }}</h2>
+                                    {% if course.publish_state == 'published' %}
+                                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                        <i class="fas fa-check-circle mr-1"></i>Publicado
+                                    </span>
+                                    {% else %}
+                                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                        <i class="fas fa-edit mr-1"></i>Borrador
+                                    </span>
+                                    {% endif %}
+                                    
+                                    {% if not course.is_active %}
+                                    <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                        <i class="fas fa-ban mr-1"></i>Inactivo
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <p class="text-gray-600 mb-4 line-clamp-2">{{ course.description|truncatewords:30 }}</p>
+                                
+                                <!-- Metadatos -->
+                                <div class="flex flex-wrap gap-4 text-sm text-gray-500 mb-4">
+                                    <span><i class="fas fa-signal mr-1"></i>{{ course.get_level_display }}</span>
+                                    <span><i class="fas fa-clock mr-1"></i>{{ course.estimated_hours }}h estimadas</span>
+                                    <span><i class="fas fa-list mr-1"></i>{{ course.modules_count }} módulos</span>
+                                    <span><i class="fas fa-user mr-1"></i>{{ course.author.get_full_name|default:course.author.email }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Acciones -->
+                            <div class="flex flex-col gap-2 ml-4">
+                                <a href="{% url 'educational:admin_course_detail' course.pk %}" 
+                                   class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-center text-sm">
+                                    <i class="fas fa-eye mr-1"></i>Ver Detalles
+                                </a>
+                                <a href="{% url 'educational:admin_course_update' course.pk %}" 
+                                   class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors text-center text-sm">
+                                    <i class="fas fa-edit mr-1"></i>Editar
+                                </a>
+                                <a href="{% url 'educational:admin_course_delete' course.pk %}" 
+                                   class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors text-center text-sm">
+                                    <i class="fas fa-trash mr-1"></i>Eliminar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Paginación -->
+        {% if is_paginated %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-white rounded shadow hover:bg-gray-50">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                <span class="px-4 py-2 bg-colombia-blue text-white rounded shadow">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-white rounded shadow hover:bg-gray-50">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Estado vacío -->
+        <div class="bg-white rounded-lg shadow-md p-12 text-center">
+            <i class="fas fa-graduation-cap text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-2xl font-bold text-gray-700 mb-2">No hay cursos creados</h3>
+            <p class="text-gray-500 mb-6">Comienza creando tu primer curso educativo</p>
+            <a href="{% url 'educational:admin_course_create' %}" 
+               class="inline-block bg-solar-yellow text-colombia-blue px-8 py-3 rounded-lg hover:bg-yellow-400 transition-colors font-semibold">
+                <i class="fas fa-plus mr-2"></i>Crear Primer Curso
+            </a>
+        </div>
+        {% endif %}
+        
+    </div>
+</div>
+{% endblock %}

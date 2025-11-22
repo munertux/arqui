@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ action }} Pregunta Examen Final - SIESE{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumb -->
+        <nav class="mb-6 text-sm">
+            <ol class="flex items-center space-x-2 text-gray-600">
+                <li><a href="{% url 'educational:admin_course_list' %}" class="hover:text-colombia-blue">Cursos</a></li>
+                <li><i class="fas fa-chevron-right text-xs"></i></li>
+                <li><a href="{% url 'educational:admin_course_detail' course.pk %}" class="hover:text-colombia-blue">{{ course.title }}</a></li>
+                <li><i class="fas fa-chevron-right text-xs"></i></li>
+                <li class="text-colombia-blue font-medium">{{ action }} Pregunta Examen Final</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                        <i class="fas fa-trophy text-solar-orange mr-2"></i>
+                        {{ action }} Pregunta Examen Final
+                    </h1>
+                    <p class="text-gray-600">
+                        Curso: <span class="font-medium">{{ course.title }}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de Pregunta -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <form method="post" class="p-6">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <!-- Texto de la Pregunta -->
+                <div class="mb-6">
+                    <label for="id_text" class="block text-sm font-medium text-gray-700 mb-2">
+                        Texto de la Pregunta *
+                    </label>
+                    {{ form.text }}
+                    {% if form.text.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.text.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Tipo de Pregunta -->
+                <div class="mb-6">
+                    <label for="id_question_type" class="block text-sm font-medium text-gray-700 mb-2">
+                        Tipo de Pregunta *
+                    </label>
+                    {{ form.question_type }}
+                    {% if form.question_type.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.question_type.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">
+                        <strong>single:</strong> Opción única correcta •
+                        <strong>multiple:</strong> Múltiples opciones correctas
+                    </p>
+                </div>
+
+                <!-- Explicación -->
+                <div class="mb-6">
+                    <label for="id_explanation" class="block text-sm font-medium text-gray-700 mb-2">
+                        Explicación
+                        <span class="text-gray-500 font-normal">(Opcional)</span>
+                    </label>
+                    {{ form.explanation }}
+                    {% if form.explanation.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.explanation.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">
+                        Se mostrará al estudiante después de responder.
+                    </p>
+                </div>
+
+                <!-- Estado (solo en edición) -->
+                {% if action == 'Editar' %}
+                <div class="mb-6">
+                    <div class="flex items-center">
+                        {{ form.is_active }}
+                        <label for="id_is_active" class="ml-2 text-sm text-gray-700">
+                            Pregunta activa en el examen final
+                        </label>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Botones -->
+                <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                    <a href="{% url 'educational:admin_course_detail' course.pk %}" 
+                       class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-2.5 bg-solar-orange text-white rounded-lg hover:bg-orange-600 transition-colors shadow-sm">
+                        <i class="fas fa-save mr-2"></i>
+                        {{ action }} Pregunta
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Opciones de Respuesta (siempre visible) -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="bg-orange-50 border-b border-orange-200 px-6 py-4">
+                <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-list-ol text-solar-orange mr-2"></i>
+                    Opciones de Respuesta
+                </h2>
+            </div>
+            
+            <div class="p-6">
+                {% if action == 'Editar' and options %}
+                <div class="space-y-3 mb-4" id="options-list">
+                    {% for option in options %}
+                    <div class="flex items-center justify-between p-4 border rounded-lg {% if option.is_correct %}bg-green-50 border-green-300{% else %}bg-gray-50 border-gray-200{% endif %}">
+                        <div class="flex items-center gap-3">
+                            {% if option.is_correct %}
+                            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            {% else %}
+                            <i class="fas fa-circle text-gray-400"></i>
+                            {% endif %}
+                            <span class="{% if option.is_correct %}font-semibold text-green-900{% else %}text-gray-700{% endif %}">
+                                {{ option.text }}
+                            </span>
+                        </div>
+                        <button onclick="deleteOption({{ option.pk }})" 
+                                type="button"
+                                class="text-red-600 hover:text-red-800 px-3 py-1">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% elif action == 'Crear' %}
+                <div class="space-y-3 mb-4" id="options-list">
+                    <!-- Las opciones se agregarán aquí dinámicamente -->
+                </div>
+                {% else %}
+                <p class="text-gray-600 mb-4">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    No hay opciones de respuesta. Agrega al menos 2 opciones.
+                </p>
+                {% endif %}
+
+                <!-- Formulario para agregar opción -->
+                <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-orange-900 mb-3">
+                        <i class="fas fa-plus-circle mr-2"></i>
+                        {% if action == 'Crear' %}Agregar Opciones (se guardarán con la pregunta){% else %}Agregar Nueva Opción{% endif %}
+                    </h3>
+                    <div id="optionForm" class="space-y-3">
+                        <div>
+                            <input type="text" 
+                                   id="optionText" 
+                                   name="option_text" 
+                                   placeholder="Texto de la opción"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-solar-orange focus:border-transparent"
+                                   required>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" 
+                                       id="optionIsCorrect" 
+                                       name="option_is_correct"
+                                       class="w-5 h-5 text-solar-orange border-gray-300 rounded focus:ring-2 focus:ring-solar-orange">
+                                <span class="ml-2 text-sm text-gray-700 font-medium">Esta es la respuesta correcta</span>
+                            </label>
+                        </div>
+                        <button type="button" 
+                                onclick="{% if action == 'Crear' %}addOptionToList(){% else %}addOption(){% endif %}"
+                                class="w-full bg-solar-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Agregar Opción
+                        </button>
+                    </div>
+                </div>
+
+                {% if action == 'Crear' %}
+                <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Las opciones se agregarán temporalmente aquí. Cuando guardes la pregunta arriba, todas las opciones se guardarán juntas.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <script>
+            // Variables para opciones temporales (modo crear)
+            let tempOptions = [];
+            
+            // Agregar opción a la lista temporal (modo crear)
+            function addOptionToList() {
+                const text = document.getElementById('optionText').value.trim();
+                const isCorrect = document.getElementById('optionIsCorrect').checked;
+                
+                if (!text) {
+                    alert('Por favor ingresa el texto de la opción');
+                    return;
+                }
+                
+                // Agregar a la lista temporal
+                tempOptions.push({ text, isCorrect });
+                
+                // Renderizar la lista
+                renderTempOptions();
+                
+                // Limpiar formulario
+                document.getElementById('optionText').value = '';
+                document.getElementById('optionIsCorrect').checked = false;
+            }
+            
+            // Renderizar opciones temporales
+            function renderTempOptions() {
+                const container = document.getElementById('options-list');
+                container.innerHTML = tempOptions.map((opt, index) => `
+                    <div class="flex items-center justify-between p-4 border rounded-lg ${opt.isCorrect ? 'bg-green-50 border-green-300' : 'bg-gray-50 border-gray-200'}">
+                        <div class="flex items-center gap-3">
+                            ${opt.isCorrect 
+                                ? '<i class="fas fa-check-circle text-green-600 text-xl"></i>' 
+                                : '<i class="fas fa-circle text-gray-400"></i>'}
+                            <span class="${opt.isCorrect ? 'font-semibold text-green-900' : 'text-gray-700'}">
+                                ${opt.text}
+                            </span>
+                        </div>
+                        <button onclick="removeTempOption(${index})" 
+                                type="button"
+                                class="text-red-600 hover:text-red-800 px-3 py-1">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+            
+            // Eliminar opción temporal
+            function removeTempOption(index) {
+                tempOptions.splice(index, 1);
+                renderTempOptions();
+            }
+            
+            // Al enviar el formulario principal, agregar las opciones como campos ocultos
+            {% if action == 'Crear' %}
+            document.querySelector('form').addEventListener('submit', function(e) {
+                if (tempOptions.length < 2) {
+                    e.preventDefault();
+                    alert('Debes agregar al menos 2 opciones de respuesta');
+                    return false;
+                }
+                
+                // Agregar las opciones como JSON en un campo oculto
+                const optionsInput = document.createElement('input');
+                optionsInput.type = 'hidden';
+                optionsInput.name = 'options_data';
+                optionsInput.value = JSON.stringify(tempOptions);
+                this.appendChild(optionsInput);
+            });
+            {% endif %}
+            
+            // Funciones para modo edición (AJAX)
+            {% if action == 'Editar' %}
+            function addOption() {
+                const text = document.getElementById('optionText').value.trim();
+                const isCorrect = document.getElementById('optionIsCorrect').checked;
+                
+                if (!text) {
+                    alert('Por favor ingresa el texto de la opción');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('text', text);
+                formData.append('is_correct', isCorrect);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                
+                fetch("{% url 'educational:admin_final_option_create' object.pk %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error al agregar la opción');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al agregar la opción');
+                });
+            }
+            
+            function deleteOption(optionId) {
+                if (!confirm('¿Estás seguro de eliminar esta opción?')) {
+                    return;
+                }
+                
+                fetch(`/education/admin/examen/opciones/${optionId}/eliminar/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar la opción');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al eliminar la opción');
+                });
+            }
+        </script>
+        {% endif %}
+
+        <!-- Ayuda -->
+        <div class="mt-6 bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <h4 class="text-sm font-semibold text-orange-900 mb-2">
+                <i class="fas fa-info-circle mr-2"></i>
+                Consejos para Crear Preguntas del Examen Final
+            </h4>
+            <ul class="text-sm text-orange-800 space-y-1">
+                <li><i class="fas fa-check-circle text-orange-600 mr-2"></i>Evalúa conceptos clave del curso completo</li>
+                <li><i class="fas fa-check-circle text-orange-600 mr-2"></i>Asegúrate de marcar la(s) respuesta(s) correcta(s)</li>
+                <li><i class="fas fa-check-circle text-orange-600 mr-2"></i>Proporciona explicaciones claras para reforzar el aprendizaje</li>
+                <li><i class="fas fa-check-circle text-orange-600 mr-2"></i>El examen debe tener al menos 5-10 preguntas bien estructuradas</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 0.625rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+    
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: none;
+        border-color: #FF8C00;
+        box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
+    }
+    
+    textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    input[type="checkbox"] {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

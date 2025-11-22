@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes scaleIn {
+    from { 
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to { 
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .animate-scaleIn {
+    animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .animate-bounce {
+    animation: bounce 1s infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-gradient-to-r from-solar-orange to-solar-yellow text-white py-12">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-4 mb-4">
+      <div class="bg-white bg-opacity-20 rounded-full p-4">
+        <i class="fas fa-trophy text-4xl"></i>
+      </div>
+      <div>
+        <h1 class="text-3xl md:text-4xl font-bold">Examen Final</h1>
+        <p class="text-lg text-gray-50">{{ course.title }}</p>
+      </div>
+    </div>
+    <p class="text-gray-50 max-w-2xl">
+      <i class="fas fa-info-circle mr-2"></i>
+      Responde todas las preguntas y obtén al menos {{ course.final_pass_score }}% para certificarte.
+    </p>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  {% if questions %}
+    <div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-solar-yellow">
+      <form id="final-exam-form" method="post" action="{% url 'educational:final_exam' course.slug %}">
+        {% csrf_token %}
+        
+        <div class="mb-8 p-6 bg-yellow-50 border-l-4 border-solar-yellow rounded-r-lg">
+          <div class="flex items-start gap-3">
+            <i class="fas fa-exclamation-triangle text-solar-orange text-xl mt-1"></i>
+            <div>
+              <h3 class="font-bold text-gray-900 mb-1">Instrucciones importantes</h3>
+              <ul class="text-sm text-gray-700 space-y-1">
+                <li>• Lee cuidadosamente cada pregunta</li>
+                <li>• Algunas preguntas permiten múltiples respuestas</li>
+                <li>• Revisa tus respuestas antes de enviar</li>
+                <li>• Tienes {{ course.max_final_attempts|default:"ilimitados" }} intento(s)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          {% for question in questions %}
+            <div class="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-colombia-blue transition-colors">
+              <div class="flex items-start gap-4 mb-4">
+                <span class="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-colombia-blue text-white font-bold rounded-full text-sm">
+                  {{ forloop.counter }}
+                </span>
+                <div class="flex-1">
+                  <p class="text-lg font-semibold text-gray-900">{{ question.text }}</p>
+                  {% if question.question_type == 'multiple' %}
+                    <span class="inline-block mt-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      <i class="fas fa-check-double mr-1"></i>Selección múltiple
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <div class="space-y-2 ml-14">
+                {% for opt in question.final_options.all %}
+                  <label class="flex items-start gap-3 p-4 bg-white rounded-lg hover:bg-blue-50 cursor-pointer transition-all border border-transparent hover:border-colombia-blue group">
+                    {% if question.question_type == 'single' %}
+                      <input type="radio" name="question_{{ question.id }}" value="{{ opt.id }}" 
+                             class="mt-1 w-5 h-5 text-colombia-blue focus:ring-colombia-blue">
+                    {% else %}
+                      <input type="checkbox" value="{{ opt.id }}" data-q="{{ question.id }}" 
+                             class="mt-1 w-5 h-5 text-colombia-blue focus:ring-colombia-blue multi-opt">
+                    {% endif %}
+                    <span class="flex-1 text-gray-800 group-hover:text-colombia-blue transition-colors">{{ opt.text }}</span>
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="mt-10 flex items-center justify-between p-6 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200">
+          <div>
+            <p class="text-sm text-gray-600">¿Listo para enviar?</p>
+            <p class="text-xs text-gray-500 mt-1">Asegúrate de haber respondido todas las preguntas</p>
+          </div>
+          <button type="submit" 
+                  class="px-8 py-4 bg-gradient-to-r from-earth-green to-colombia-blue text-white font-bold rounded-lg hover:shadow-2xl transition-all text-lg transform hover:scale-105">
+            <i class="fas fa-paper-plane mr-2"></i>Enviar examen
+          </button>
+        </div>
+      </form>
+
+      <div id="exam-result" class="mt-8"></div>
+    </div>
+  {% else %}
+    <!-- Empty State -->
+    <div class="bg-white rounded-2xl shadow-xl p-12 text-center">
+      <div class="inline-block p-6 bg-gray-100 rounded-full mb-6">
+        <i class="fas fa-clipboard-list text-6xl text-gray-400"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-700 mb-3">No hay preguntas configuradas</h3>
+      <p class="text-gray-500 mb-6">El examen final aún no está disponible para este curso.</p>
+      <a href="{% url 'educational:course_detail' course.slug %}" 
+         class="inline-block px-6 py-3 bg-colombia-blue text-white rounded-lg hover:bg-earth-green transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>Volver al curso
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  const form = document.getElementById('final-exam-form');
+  if(form){
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      
+      // Recolectar respuestas múltiples
+      document.querySelectorAll('[data-q]').forEach(cb => {
+        const qid = cb.getAttribute('data-q');
+        const name = 'question_' + qid;
+        let selected = Array.from(document.querySelectorAll(`[data-q="${qid}"]:checked`)).map(el => el.value);
+        let hidden = form.querySelector(`input[type=hidden][name="${name}"]`);
+        if(hidden) hidden.remove();
+        hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = name;
+        hidden.value = selected.join(',');
+        form.appendChild(hidden);
+      });
+      
+      const resultDiv = document.getElementById('exam-result');
+      resultDiv.innerHTML = '<div class="p-6 rounded-xl bg-blue-100 text-blue-800 text-center"><i class="fas fa-spinner fa-spin text-2xl mr-3"></i>Evaluando tu examen...</div>';
+      
+      fetch(form.action, {method: 'POST', body: new FormData(form)})
+        .then(r => r.json())
+        .then(data => {
+          // Mostrar modal con resultado
+          showResultModal(data);
+        })
+        .catch(err => {
+          resultDiv.innerHTML = `
+            <div class='p-6 rounded-xl bg-red-100 text-red-800 text-center'>
+              <i class="fas fa-exclamation-triangle text-2xl mr-2"></i>
+              <p class="font-semibold">Error al enviar el examen</p>
+              <p class="text-sm mt-2">Por favor, intenta nuevamente.</p>
+            </div>`;
+        });
+    });
+  }
+
+  // Función para mostrar modal de resultados
+  function showResultModal(data) {
+    const modal = document.createElement('div');
+    modal.id = 'result-modal';
+    modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-75 animate-fadeIn';
+    
+    const percentage = data.score;
+    const isPassed = data.passed;
+    const emoji = isPassed ? '🎉' : '😔';
+    const bgColor = isPassed ? 'from-green-500 to-green-700' : 'from-orange-500 to-orange-700';
+    const textColor = isPassed ? 'text-green-600' : 'text-orange-600';
+    
+    modal.innerHTML = `
+      <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full transform animate-scaleIn">
+        <!-- Header con gradiente -->
+        <div class="bg-gradient-to-r ${bgColor} text-white p-8 rounded-t-3xl text-center">
+          <div class="text-7xl mb-4 animate-bounce">${emoji}</div>
+          <h2 class="text-4xl font-bold mb-2">
+            ${isPassed ? '¡Felicitaciones!' : '¡Buen intento!'}
+          </h2>
+          <p class="text-xl opacity-90">
+            ${isPassed ? 'Has aprobado el examen final' : 'Sigue practicando'}
+          </p>
+        </div>
+
+        <!-- Cuerpo del modal -->
+        <div class="p-8">
+          <!-- Puntaje principal -->
+          <div class="text-center mb-8">
+            <div class="inline-block relative">
+              <svg class="transform -rotate-90 w-48 h-48">
+                <circle cx="96" cy="96" r="88" stroke="#e5e7eb" stroke-width="12" fill="none"></circle>
+                <circle cx="96" cy="96" r="88" 
+                        stroke="${isPassed ? '#22c55e' : '#f97316'}" 
+                        stroke-width="12" 
+                        fill="none"
+                        stroke-dasharray="${(percentage / 100) * 553} 553"
+                        stroke-linecap="round"
+                        class="transition-all duration-1000 ease-out"></circle>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center flex-col">
+                <div class="text-6xl font-bold ${textColor}">${percentage}%</div>
+                <div class="text-sm text-gray-500 mt-1">Tu puntaje</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detalles -->
+          <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-gray-50 rounded-xl p-4 text-center">
+              <div class="text-3xl font-bold text-green-600">${data.correct}</div>
+              <div class="text-sm text-gray-600 mt-1">Respuestas correctas</div>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4 text-center">
+              <div class="text-3xl font-bold text-gray-700">${data.total}</div>
+              <div class="text-sm text-gray-600 mt-1">Total de preguntas</div>
+            </div>
+          </div>
+
+          ${!isPassed ? `
+          <div class="bg-orange-50 border-l-4 border-orange-400 p-4 mb-6 rounded">
+            <div class="flex items-center">
+              <i class="fas fa-info-circle text-orange-500 text-xl mr-3"></i>
+              <div>
+                <p class="font-semibold text-orange-800">Puntaje mínimo requerido: ${data.required}%</p>
+                <p class="text-sm text-orange-700 mt-1">Te faltaron ${data.required - percentage} puntos para aprobar</p>
+              </div>
+            </div>
+          </div>
+          ` : ''}
+
+          ${isPassed && data.certificate_code ? `
+          <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-xl p-6 mb-6">
+            <div class="text-center">
+              <i class="fas fa-certificate text-yellow-600 text-4xl mb-3"></i>
+              <p class="text-sm font-semibold text-yellow-800 mb-2">¡Has obtenido tu certificado!</p>
+              <p class="text-xs text-yellow-700 mb-3">Código de certificado:</p>
+              <div class="bg-white rounded-lg p-3 inline-block">
+                <p class="text-2xl font-mono font-bold text-yellow-800">${data.certificate_code}</p>
+              </div>
+            </div>
+          </div>
+          ` : ''}
+
+          <!-- Mensaje motivacional -->
+          <div class="text-center mb-6">
+            <p class="text-gray-600 italic">
+              ${isPassed 
+                ? '"El conocimiento es el único tesoro que crece cuando se comparte"' 
+                : '"Cada intento te acerca más al éxito. ¡No te rindas!"'}
+            </p>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="flex gap-3">
+            ${isPassed ? `
+              <a href="/education/cursos/certificado/${data.certificate_code}/" 
+                 class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-xl hover:from-green-600 hover:to-green-700 transition-all font-bold text-center shadow-lg">
+                <i class="fas fa-certificate mr-2"></i>Ver y Descargar Certificado
+              </a>
+            ` : `
+              <button onclick="location.reload()" 
+                      class="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-4 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-bold shadow-lg">
+                <i class="fas fa-redo mr-2"></i>Reintentar examen
+              </button>
+              <a href="/education/cursos/${data.course_slug}/" 
+                 class="flex-1 bg-gray-200 text-gray-700 px-6 py-4 rounded-xl hover:bg-gray-300 transition-all font-bold text-center">
+                <i class="fas fa-arrow-left mr-2"></i>Volver al curso
+              </a>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Animar entrada
+    setTimeout(() => {
+      modal.querySelector('.animate-scaleIn').style.transform = 'scale(1)';
+    }, 10);
+  }
+
+</script>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-gradient-to-r from-colombia-blue to-earth-green text-white py-12">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div class="inline-block p-5 bg-white bg-opacity-20 rounded-full mb-4">
+      <i class="fas fa-shield-check text-5xl"></i>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-bold mb-3">Verificación de Certificado</h1>
+    <p class="text-lg text-gray-50">Valida la autenticidad de un certificado emitido por SIESE</p>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  {% if certificate %}
+    <!-- Valid Certificate -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-4 border-earth-green">
+      <!-- Status Banner -->
+      <div class="bg-gradient-to-r from-earth-green to-green-700 text-white p-6 text-center">
+        <div class="flex items-center justify-center gap-3 mb-2">
+          <i class="fas fa-check-circle text-4xl"></i>
+          <h2 class="text-2xl font-bold">Certificado válido y auténtico</h2>
+        </div>
+        <p class="text-sm opacity-90">Este certificado ha sido verificado exitosamente</p>
+      </div>
+
+      <!-- Certificate Details -->
+      <div class="p-8">
+        <div class="mb-6 p-4 bg-gray-50 rounded-xl">
+          <p class="text-sm text-gray-600 mb-2">Código de verificación</p>
+          <p class="text-2xl font-mono font-bold text-colombia-blue tracking-wider">{{ code }}</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+          <div class="bg-blue-50 rounded-xl p-5">
+            <div class="flex items-start gap-3">
+              <i class="fas fa-user-graduate text-colombia-blue text-2xl mt-1"></i>
+              <div>
+                <p class="text-sm text-gray-600 mb-1">Estudiante certificado</p>
+                <p class="font-bold text-gray-900 text-lg">{{ certificate.user.full_name }}</p>
+                <p class="text-sm text-gray-600">{{ certificate.user.email }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-green-50 rounded-xl p-5">
+            <div class="flex items-start gap-3">
+              <i class="fas fa-book-open text-earth-green text-2xl mt-1"></i>
+              <div>
+                <p class="text-sm text-gray-600 mb-1">Curso completado</p>
+                <p class="font-bold text-gray-900 text-lg">{{ certificate.course.title }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-yellow-50 rounded-xl p-5">
+            <div class="flex items-start gap-3">
+              <i class="fas fa-star text-solar-orange text-2xl mt-1"></i>
+              <div>
+                <p class="text-sm text-gray-600 mb-1">Puntaje final</p>
+                <p class="font-bold text-gray-900 text-3xl">{{ certificate.final_score }}%</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-purple-50 rounded-xl p-5">
+            <div class="flex items-start gap-3">
+              <i class="fas fa-calendar-check text-purple-600 text-2xl mt-1"></i>
+              <div>
+                <p class="text-sm text-gray-600 mb-1">Fecha de emisión</p>
+                <p class="font-bold text-gray-900 text-lg">{{ certificate.issued_at|date:'d/m/Y' }}</p>
+                <p class="text-xs text-gray-500">{{ certificate.issued_at|date:'h:i A' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Download PDF -->
+        {% if certificate.pdf_file %}
+          <div class="text-center pt-6 border-t">
+            <a href="{{ certificate.pdf_file.url }}" 
+               target="_blank" 
+               download
+               class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-colombia-blue to-earth-green text-white font-bold rounded-xl hover:shadow-2xl transition-all transform hover:scale-105">
+              <i class="fas fa-download text-xl"></i>
+              <span>Descargar certificado PDF</span>
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  {% else %}
+    <!-- Invalid Certificate -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-4 border-red-500">
+      <!-- Status Banner -->
+      <div class="bg-gradient-to-r from-red-500 to-red-700 text-white p-6 text-center">
+        <div class="flex items-center justify-center gap-3 mb-2">
+          <i class="fas fa-times-circle text-4xl"></i>
+          <h2 class="text-2xl font-bold">Certificado no encontrado</h2>
+        </div>
+        <p class="text-sm opacity-90">No se pudo verificar la autenticidad de este certificado</p>
+      </div>
+
+      <!-- Error Details -->
+      <div class="p-8 text-center">
+        <div class="inline-block p-6 bg-red-50 rounded-full mb-6">
+          <i class="fas fa-exclamation-triangle text-red-500 text-6xl"></i>
+        </div>
+        
+        <h3 class="text-xl font-bold text-gray-900 mb-3">No se encontró un certificado válido</h3>
+        <p class="text-gray-600 mb-6">
+          El código <span class="font-mono bg-gray-100 px-3 py-1 rounded">{{ code }}</span> 
+          no corresponde a ningún certificado emitido por SIESE.
+        </p>
+
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 rounded-r-xl p-6 text-left mb-6">
+          <p class="font-semibold text-gray-800 mb-2">
+            <i class="fas fa-lightbulb text-yellow-600 mr-2"></i>
+            Posibles causas
+          </p>
+          <ul class="text-sm text-gray-700 space-y-1">
+            <li>• El código fue escrito incorrectamente</li>
+            <li>• El certificado ha sido revocado</li>
+            <li>• El certificado nunca fue emitido</li>
+            <li>• El código ha expirado o es inválido</li>
+          </ul>
+        </div>
+
+        <a href="{% url 'educational:course_list' %}" 
+           class="inline-flex items-center gap-2 px-6 py-3 bg-colombia-blue text-white font-semibold rounded-lg hover:bg-earth-green transition-colors">
+          <i class="fas fa-book-open"></i>
+          <span>Ver cursos disponibles</span>
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Info Box -->
+  <div class="mt-8 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 border border-blue-200">
+    <div class="flex items-start gap-4">
+      <i class="fas fa-info-circle text-colombia-blue text-3xl mt-1"></i>
+      <div>
+        <h3 class="font-bold text-gray-900 mb-2">¿Cómo verificar un certificado?</h3>
+        <p class="text-sm text-gray-700 mb-3">
+          Cada certificado emitido por SIESE incluye un código único de verificación. 
+          Para validar su autenticidad, ingresa el código completo en la URL:
+        </p>
+        <code class="text-xs bg-white px-3 py-2 rounded border block">
+          https://siese.com/education/certificados/verificar/[CÓDIGO]
+        </code>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

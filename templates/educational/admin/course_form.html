@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ action }} Curso - SIESE{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-6">
+            <a href="{% url 'educational:admin_course_list' %}" class="text-colombia-blue hover:text-blue-800 mb-4 inline-block">
+                <i class="fas fa-arrow-left mr-2"></i>Volver a la lista
+            </a>
+            <h1 class="text-3xl font-bold text-colombia-blue">
+                <i class="fas fa-graduation-cap mr-2"></i>
+                {{ action }} Curso
+            </h1>
+        </div>
+
+        <!-- Formulario -->
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+                
+                <!-- Información Básica -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-info-circle mr-2 text-colombia-blue"></i>
+                        Información Básica
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Título -->
+                        <div class="md:col-span-2">
+                            <label for="{{ form.title.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Título del Curso <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.title.errors }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Slug -->
+                        <div>
+                            <label for="{{ form.slug.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Slug (URL) <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.slug }}
+                            {% if form.slug.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.slug.errors }}</p>
+                            {% endif %}
+                            <p class="text-gray-500 text-xs mt-1">URL amigable para el curso (ej: fundamentos-energia-solar)</p>
+                        </div>
+                        
+                        <!-- Categoría -->
+                        <div>
+                            <label for="{{ form.category.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Categoría
+                            </label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.category.errors }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Descripción -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-align-left mr-2 text-colombia-blue"></i>
+                        Contenido Descriptivo
+                    </h2>
+                    
+                    <div>
+                        <label for="{{ form.description.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Descripción <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.description.errors }}</p>
+                        {% endif %}
+                        <p class="text-gray-500 text-xs mt-1">Descripción general del curso (visible públicamente)</p>
+                    </div>
+                </div>
+                
+                <!-- Configuración -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-cog mr-2 text-colombia-blue"></i>
+                        Configuración del Curso
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Nivel -->
+                        <div>
+                            <label for="{{ form.level.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Nivel <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.level }}
+                            {% if form.level.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.level.errors }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Estado de publicación -->
+                        <div>
+                            <label for="{{ form.publish_state.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Estado <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.publish_state }}
+                            {% if form.publish_state.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.publish_state.errors }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Horas estimadas -->
+                        <div>
+                            <label for="{{ form.estimated_hours.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Horas Estimadas
+                            </label>
+                            {{ form.estimated_hours }}
+                            {% if form.estimated_hours.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.estimated_hours.errors }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Score examen final -->
+                        <div>
+                            <label for="{{ form.final_pass_score.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Puntaje Mínimo Examen Final (%)
+                            </label>
+                            {{ form.final_pass_score }}
+                            {% if form.final_pass_score.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.final_pass_score.errors }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Máximo intentos examen final -->
+                        <div>
+                            <label for="{{ form.max_final_attempts.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Máx. Intentos Examen (0 = ilimitado)
+                            </label>
+                            {{ form.max_final_attempts }}
+                            {% if form.max_final_attempts.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.max_final_attempts.errors }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Activo (solo en edición) -->
+                        {% if action == 'Editar' %}
+                        <div class="flex items-center">
+                            <label class="flex items-center cursor-pointer">
+                                {{ form.is_active }}
+                                <span class="ml-2 text-sm font-semibold text-gray-700">Curso Activo</span>
+                            </label>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Botones -->
+                <div class="flex justify-end gap-4 pt-6 border-t border-gray-200">
+                    <a href="{% url 'educational:admin_course_list' %}" 
+                       class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold">
+                        <i class="fas fa-times mr-2"></i>Cancelar
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-solar-yellow text-colombia-blue rounded-lg hover:bg-yellow-400 transition-colors font-semibold shadow-md">
+                        <i class="fas fa-save mr-2"></i>{{ action }} Curso
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos para los campos del formulario */
+    input[type="text"],
+    input[type="number"],
+    input[type="url"],
+    input[type="file"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+    
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="url"]:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #003A70;
+        box-shadow: 0 0 0 3px rgba(0, 58, 112, 0.1);
+    }
+    
+    textarea {
+        min-height: 150px;
+        resize: vertical;
+    }
+    
+    input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    // Auto-generar slug desde el título
+    document.addEventListener('DOMContentLoaded', function() {
+        const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+        const slugInput = document.getElementById('{{ form.slug.id_for_label }}');
+        
+        if (titleInput && slugInput && !slugInput.value) {
+            titleInput.addEventListener('input', function() {
+                const slug = this.value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-')
+                    .trim();
+                slugInput.value = slug;
+            });
+        }
+    });
+</script>
+{% endblock %}

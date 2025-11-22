@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Breadcrumb Navigation -->
+<div class="bg-gray-50 border-b border-gray-200">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+    <nav class="flex items-center gap-2 text-sm text-gray-600">
+      <a href="{% url 'educational:course_list' %}" class="hover:text-colombia-blue transition-colors">
+        <i class="fas fa-graduation-cap"></i> Cursos
+      </a>
+      <i class="fas fa-chevron-right text-xs"></i>
+      <a href="{% url 'educational:course_detail' course.slug %}" class="hover:text-colombia-blue transition-colors">
+        {{ course.title|truncatechars:30 }}
+      </a>
+      <i class="fas fa-chevron-right text-xs"></i>
+      <span class="text-colombia-blue font-medium">{{ module.title }}</span>
+    </nav>
+  </div>
+</div>
+
+<!-- Slide Progress Bar -->
+<div class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center justify-between mb-2">
+      <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ module.title }}</h1>
+      <span class="text-sm text-gray-500 font-medium">{{ slide.order }} / {{ module.slides_count }}</span>
+    </div>
+    <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+      <div class="bg-gradient-to-r from-colombia-blue to-earth-green h-2 transition-all duration-300" 
+           style="width: calc({{ slide.order }} / {{ module.slides_count }} * 100%)"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="grid lg:grid-cols-4 gap-8">
+    <!-- Slide Content -->
+    <div class="lg:col-span-3">
+      <div class="bg-white rounded-xl shadow-md p-8 md:p-12 border border-gray-100 mb-6">
+        <h2 class="text-2xl md:text-3xl font-bold text-colombia-blue mb-6">{{ slide.title }}</h2>
+        <article class="prose prose-lg max-w-none prose-headings:text-colombia-blue prose-a:text-earth-green prose-strong:text-gray-900">
+          {{ slide.content|safe }}
+        </article>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="flex items-center justify-between gap-4">
+        {% if slide.order > 1 %}
+          <a href="{% url 'educational:module_slide' course.slug module.order slide.order|add:-1 %}" 
+             class="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors">
+            <i class="fas fa-chevron-left"></i> Anterior
+          </a>
+        {% else %}
+          <div></div>
+        {% endif %}
+        
+        {% if slide.order < module.slides_count %}
+          <a href="{% url 'educational:module_slide' course.slug module.order slide.order|add:1 %}" 
+             class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-colombia-blue to-earth-green text-white font-semibold rounded-lg hover:shadow-lg transition-all">
+            Siguiente <i class="fas fa-chevron-right"></i>
+          </a>
+        {% else %}
+          <button onclick="document.getElementById('quiz-section').scrollIntoView({behavior: 'smooth'})" 
+                  class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-solar-orange to-solar-yellow text-white font-bold rounded-lg hover:shadow-lg transition-all animate-pulse">
+            Ir al cuestionario <i class="fas fa-file-alt"></i>
+          </button>
+        {% endif %}
+      </div>
+
+      <!-- Quiz Section (only on last slide) -->
+      {% if slide.order >= module.slides_count %}
+        <div id="quiz-section" class="mt-12 bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-xl p-8 border-2 border-colombia-blue">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="bg-colombia-blue rounded-full p-4">
+              <i class="fas fa-clipboard-check text-3xl text-white"></i>
+            </div>
+            <div>
+              <h2 class="text-2xl md:text-3xl font-bold text-gray-900">Cuestionario del módulo</h2>
+              <p class="text-gray-600">Demuestra lo que has aprendido</p>
+            </div>
+          </div>
+
+          <form id="quiz-form" method="post" action="{% url 'educational:module_quiz' course.slug module.order %}">
+            {% csrf_token %}
+            <div class="space-y-6">
+              {% for question in module.questions.all %}
+                <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                  <p class="text-lg font-semibold text-gray-900 mb-4">
+                    <span class="inline-block w-8 h-8 bg-colombia-blue text-white rounded-full text-center leading-8 mr-2 text-sm">
+                      {{ forloop.counter }}
+                    </span>
+                    {{ question.text }}
+                  </p>
+                  <div class="space-y-2 ml-10">
+                    {% for opt in question.options.all %}
+                      <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-colombia-blue">
+                        {% if question.question_type == 'single' %}
+                          <input type="radio" name="question_{{ question.id }}" value="{{ opt.id }}" 
+                                 class="mt-1 w-4 h-4 text-colombia-blue focus:ring-colombia-blue">
+                        {% else %}
+                          <input type="checkbox" value="{{ opt.id }}" data-q="{{ question.id }}" 
+                                 class="mt-1 w-4 h-4 text-colombia-blue focus:ring-colombia-blue multi-opt">
+                        {% endif %}
+                        <span class="flex-1 text-gray-700">{{ opt.text }}</span>
+                      </label>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="mt-8 flex items-center justify-end gap-4">
+              <button type="submit" 
+                      class="px-8 py-4 bg-gradient-to-r from-earth-green to-colombia-blue text-white font-bold rounded-lg hover:shadow-xl transition-all text-lg">
+                <i class="fas fa-paper-plane mr-2"></i>Enviar respuestas
+              </button>
+            </div>
+          </form>
+
+          <div id="quiz-result" class="mt-6"></div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100 sticky top-24">
+        <h3 class="font-bold text-lg mb-4 text-gray-900 flex items-center gap-2">
+          <i class="fas fa-list text-colombia-blue"></i> Contenido
+        </h3>
+        <div class="space-y-2 text-sm max-h-96 overflow-y-auto">
+          {% for s in module.slides.all %}
+            <a href="{% url 'educational:module_slide' course.slug module.order s.order %}" 
+               class="block p-3 rounded-lg transition-all {% if s.order == slide.order %}bg-colombia-blue text-white font-semibold{% else %}hover:bg-gray-100 text-gray-700{% endif %}">
+              <span class="{% if s.order == slide.order %}text-white{% else %}text-colombia-blue{% endif %} mr-2">{{ s.order }}.</span>
+              {{ s.title|truncatechars:35 }}
+            </a>
+          {% endfor %}
+          {% if module.questions.count > 0 %}
+            <div class="pt-2 mt-2 border-t border-gray-200">
+              <div class="p-3 bg-solar-yellow bg-opacity-20 rounded-lg text-gray-800 font-medium text-xs">
+                <i class="fas fa-clipboard-check text-solar-orange mr-1"></i> Cuestionario al final
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const form = document.getElementById('quiz-form');
+  if(form){
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      // Recolectar selección múltiple
+      document.querySelectorAll('[data-q]').forEach(cb => {
+        const qid = cb.getAttribute('data-q');
+        const name = 'question_' + qid;
+        let selected = Array.from(document.querySelectorAll(`[data-q="${qid}"]:checked`)).map(el => el.value);
+        // Crear input hidden con valores separados por coma
+        let hidden = form.querySelector(`input[type=hidden][name="${name}"]`);
+        if(hidden) hidden.remove();
+        hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = name;
+        hidden.value = selected.join(',');
+        form.appendChild(hidden);
+      });
+      
+      const resultDiv = document.getElementById('quiz-result');
+      resultDiv.innerHTML = '<div class="p-4 rounded bg-blue-100 text-blue-800"><i class="fas fa-spinner fa-spin mr-2"></i>Evaluando...</div>';
+      
+      fetch(form.action, {method: 'POST', body: new FormData(form)})
+        .then(r => r.json())
+        .then(data => {
+          if(data.passed){
+            resultDiv.innerHTML = `
+              <div class='bg-gradient-to-r from-earth-green to-green-600 text-white rounded-xl p-6 shadow-lg'>
+                <div class="flex items-start gap-4">
+                  <i class="fas fa-check-circle text-4xl"></i>
+                  <div>
+                    <h3 class="text-2xl font-bold mb-2">¡Felicitaciones!</h3>
+                    <p class="text-lg">Has aprobado con <strong>${data.score}%</strong></p>
+                    <p class="text-sm mt-2 opacity-90">Respondiste correctamente ${data.correct}/${data.total} preguntas.</p>
+                    <a href="/education/cursos/${data.course_slug}/" class="inline-block mt-4 px-6 py-2 bg-white text-earth-green font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+                      <i class="fas fa-arrow-left mr-2"></i>Volver al curso
+                    </a>
+                  </div>
+                </div>
+              </div>`;
+          } else {
+            resultDiv.innerHTML = `
+              <div class='bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl p-6 shadow-lg'>
+                <div class="flex items-start gap-4">
+                  <i class="fas fa-times-circle text-4xl"></i>
+                  <div>
+                    <h3 class="text-2xl font-bold mb-2">Intenta nuevamente</h3>
+                    <p class="text-lg">Obtuviste <strong>${data.score}%</strong> (necesitas ${data.required}%)</p>
+                    <p class="text-sm mt-2 opacity-90">Respondiste correctamente ${data.correct}/${data.total} preguntas.</p>
+                    <p class="mt-3">Revisa el contenido del módulo y vuelve a intentarlo.</p>
+                    <button onclick="location.reload()" class="inline-block mt-4 px-6 py-2 bg-white text-red-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+                      <i class="fas fa-redo mr-2"></i>Reintentar
+                    </button>
+                  </div>
+                </div>
+              </div>`;
+          }
+        })
+        .catch(err => {
+          resultDiv.innerHTML = `<div class='p-4 rounded bg-red-100 text-red-800'><i class="fas fa-exclamation-triangle mr-2"></i>Error al enviar. Intenta nuevamente.</div>`;
+        });
+    });
+  }
+</script>
+{% endblock %}
